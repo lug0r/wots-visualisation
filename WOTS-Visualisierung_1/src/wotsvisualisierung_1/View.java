@@ -11,8 +11,6 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -113,7 +111,6 @@ public class View extends ViewPart {
 			    instance.generatePublicKey();
 			    
 			    // TODO parse byte[][] keys to Hex values
-			    
 			    txt_Sigkey.setText(files.Converter._2dByteToHex(instance.getPrivateKey()));
 			    txt_Verifkey.setText(files.Converter._2dByteToHex(instance.getPublicKey()));
 			}
