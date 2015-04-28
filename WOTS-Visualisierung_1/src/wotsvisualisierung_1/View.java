@@ -93,6 +93,8 @@ public class View extends ViewPart {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
+				// Make instance of WinternitzOTS with Winternitz-Paramenter w from Input-Field
+				
 				byte[] seed;
 				int w = Integer.parseInt(txt_winternitzP.getText());
 				
@@ -109,10 +111,12 @@ public class View extends ViewPart {
 			    sRandom.nextBytes(x);
 			    instance.init(prf, x);
 			    
+			    // Generate Keys
+			    
 			    instance.generatePrivateKey(seed);
 			    instance.generatePublicKey();
 			    
-			    // TODO parse byte[][] keys to Hex values
+			    // Put keys into Key-Fields
 			    
 			    txt_Sigkey.setText(files.Converter._2dByteToHex(instance.getPrivateKey()));
 			    txt_Verifkey.setText(files.Converter._2dByteToHex(instance.getPublicKey()));
@@ -127,19 +131,28 @@ public class View extends ViewPart {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
+				// Make instance of WinternitzOTS with Winternitz-Paramenter w from Input-Field
+				
 				int w = Integer.parseInt(txt_winternitzP.getText());
 				
 				wots.WinternitzOTS instance = new wots.WinternitzOTS(w);
 				
-				// TODO parse txt_SigKey to byte[][] privateKey
+				files.PseudorandomFunction prf = new files.AESPRF.AES128();
+				int n = prf.getLength();
+			    SecureRandom sRandom = new SecureRandom();
+			    byte[] x = new byte[n];
+			    sRandom.nextBytes(x);
+			    instance.init(prf, x);
 				
-				byte[][] privateKey = null;
+			    // Set private key of the WOTS-Instance to the one given in the Key-Field
+			    
+				byte[][] privateKey = files.Converter._stringTo2dByte(txt_Sigkey.getText(), instance.getLength());
 				instance.setPrivateKey(privateKey);
 				
-				// TODO parse txt_message to byte[] message and return value to Hex
+				// Sign message and put Signature in Output Field
 				
-				byte[] message = null;
-				txt_Sig.setText(instance.sign(message).toString());
+				byte[] message = files.Converter._stringToByte(txt_message.getText());
+				txt_Sig.setText(files.Converter._byteToHex(instance.sign(message)));
 				
 			}
 		});
@@ -151,24 +164,26 @@ public class View extends ViewPart {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
+				// Make instance of WinternitzOTS with Winternitz-Paramenter w from Input-Field
+				
 				int w = Integer.parseInt(txt_winternitzP.getText());
 				
 				wots.WinternitzOTS instance = new wots.WinternitzOTS(w);
 				
-				// TODO parse txt_Verifkey to byte[][] privateKey
+				 // Set public key of the WOTS-Instance to the one given in the Key-Field
 				
-				byte[][] publicKey = null;
+				byte[][] publicKey = files.Converter._stringTo2dByte(txt_Verifkey.getText(), instance.getLength());
 				instance.setPublicKey(publicKey);
 				
-				// TODO Parse message & signature to byte[]
+				// Get message and signature from Input-fields and set winternitz Parameter to 1 if true || 2 if failed (verification)
 				
-				byte[] message = null;
-				byte[] signature = null;
+				byte[] message = files.Converter._stringToByte(txt_message.getText());
+				byte[] signature = files.Converter._stringToByte(txt_Sig.getText());
 				
 				if (instance.verify(message, signature) == true) {
-					// TODO message Box
+					txt_winternitzP.setText("1");
 				} else {
-					// TODO message Box
+					txt_winternitzP.setText("2");
 				}
 				
 				
