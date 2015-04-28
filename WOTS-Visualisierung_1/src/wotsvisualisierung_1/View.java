@@ -111,7 +111,7 @@ public class View extends ViewPart {
 			    instance.generatePublicKey();
 			    
 			    // TODO parse byte[][] keys to Hex values
-			    txt_Sigkey.setText(files.Converter._2dByteToHex(instance.getPrivateKey()));
+			    // txt_Sigkey.setText(files.Converter._2dByteToHex(instance.getPrivateKey()));
 			    txt_Verifkey.setText(files.Converter._2dByteToHex(instance.getPublicKey()));
 			}
 		});
