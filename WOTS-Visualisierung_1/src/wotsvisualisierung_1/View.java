@@ -35,6 +35,7 @@ public class View extends ViewPart {
 	private Text text_1;
 	private Text txt_Verifkey;
 	private Text txt_Sig;
+	private Text text;
 	/**
 	 * @wbp.nonvisual location=214,209
 	 */
@@ -265,6 +266,9 @@ public class View extends ViewPart {
 		});
 		btn_reset.setBounds(329, 615, 75, 25);
 		btn_reset.setText("Reset");
+		
+		text = new Text(parent, SWT.BORDER);
+		text.setBounds(282, 200, 75, 25);
 		
 
 	}
