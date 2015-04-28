@@ -25,9 +25,6 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
-//import com.sun.java.util.jar.pack.Package.File;
-//import de.tud.cdc.xmss.pqc.hbc.ots.WinternitzOTS;
-
 public class View extends ViewPart {
 	public View() {
 		setPartName("WOTS-Visualisierung");
@@ -187,7 +184,7 @@ public class View extends ViewPart {
 		lblMessage.setBounds(10, 37, 55, 15);
 		lblMessage.setText("Message");
 		
-		txt_message = new Text(parent, SWT.BORDER);
+		txt_message = new Text(parent, SWT.BORDER | SWT.MULTI);
 		txt_message.setBounds(9, 58, 679, 96);
 		
 		Button btnLoadMessageFrom = new Button(parent, SWT.NONE);
@@ -204,16 +201,13 @@ public class View extends ViewPart {
 			       
 			       File file = chooser.getSelectedFile();
 			       String path = file.getAbsolutePath();
-			       /*
 			       try {
-					txt_message.setText(test.readFile(path));
-				} catch (IOException e1) {
-					// Auto-generated catch block
-					e1.printStackTrace();
-				}
-			  		*/
+						txt_message.setText(files.WotsComposite.readFile(path));
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 			    }
-				
 			}
 		});
 		btnLoadMessageFrom.setBounds(10, 160, 154, 25);
