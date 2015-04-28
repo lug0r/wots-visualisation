@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.wb.swt.SWTResourceManager;
 
 public class View extends ViewPart {
 	public View() {
@@ -113,8 +114,8 @@ public class View extends ViewPart {
 			    
 			    // TODO parse byte[][] keys to Hex values
 			    
-			    txt_Sigkey.setText(instance.getPrivateKey().toString());
-			    txt_Verifkey.setText(instance.getPublicKey().toString());
+			    txt_Sigkey.setText(files.Converter._2dByteToHex(instance.getPrivateKey()));
+			    txt_Verifkey.setText(files.Converter._2dByteToHex(instance.getPublicKey()));
 			}
 		});
 
@@ -238,6 +239,8 @@ public class View extends ViewPart {
 		lblVerificationKey.setText("Verification key");
 		
 		txt_Sigkey = new Text(parent, SWT.BORDER);
+		txt_Sigkey.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLACK));
+		txt_Sigkey.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
 		txt_Sigkey.setText("");
 		txt_Sigkey.setBounds(10, 283, 336, 151);
 		
