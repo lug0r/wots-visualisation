@@ -203,24 +203,24 @@ public class View extends ViewPart {
 		Button btnLoadMessageFrom = new Button(parent, SWT.NONE);
 		btnLoadMessageFrom.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				JFileChooser chooser = new JFileChooser();
-			    //FileNameExtensionFilter filter = new FileNameExtensionFilter(
-			    //    "JPG & GIF Images", "jpg", "gif");
-			    //chooser.setFileFilter(filter);
-			    int returnVal = chooser.showOpenDialog(null);
-			    if(returnVal == JFileChooser.APPROVE_OPTION) {
-			       System.out.println("You chose to open this file: " +
-			            chooser.getSelectedFile().getName());
-			       
-			       File file = chooser.getSelectedFile();
-			       String path = file.getAbsolutePath();
-			       try {
-						txt_message.setText(files.WotsComposite.readFile(path));
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-			    }
+//				JFileChooser chooser = new JFileChooser();
+//			    //FileNameExtensionFilter filter = new FileNameExtensionFilter(
+//			    //    "JPG & GIF Images", "jpg", "gif");
+//			    //chooser.setFileFilter(filter);
+//			    int returnVal = chooser.showOpenDialog(null);
+//			    if(returnVal == JFileChooser.APPROVE_OPTION) {
+//			       System.out.println("You chose to open this file: " +
+//			            chooser.getSelectedFile().getName());
+//			       
+//			       File file = chooser.getSelectedFile();
+//			       String path = file.getAbsolutePath();
+//			       try {
+//						txt_message.setText(files.WotsComposite.readFile(path));
+//					} catch (IOException e1) {
+//						// TODO Auto-generated catch block
+//						e1.printStackTrace();
+//					}
+//			    }
 			}
 		});
 		btnLoadMessageFrom.setBounds(10, 160, 154, 25);
