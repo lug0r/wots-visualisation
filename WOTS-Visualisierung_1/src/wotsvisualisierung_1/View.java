@@ -182,7 +182,7 @@ public class View extends ViewPart {
 		lblMessage.setBounds(10, 37, 55, 15);
 		lblMessage.setText("Message");
 		
-		txt_message = new Text(parent, SWT.BORDER | SWT.MULTI);
+		txt_message = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
 		txt_message.setBounds(9, 58, 679, 96);
 		
 		Button btnLoadMessageFrom = new Button(parent, SWT.NONE);
@@ -235,20 +235,20 @@ public class View extends ViewPart {
 		lblVerificationKey.setBounds(352, 262, 111, 15);
 		lblVerificationKey.setText("Verification key");
 		
-		txt_Sigkey = new Text(parent, SWT.BORDER);
+		txt_Sigkey = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
 		txt_Sigkey.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLACK));
 		txt_Sigkey.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
 		txt_Sigkey.setText("");
 		txt_Sigkey.setBounds(10, 283, 336, 151);
 		
-		txt_Verifkey = new Text(parent, SWT.BORDER);
+		txt_Verifkey = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
 		txt_Verifkey.setBounds(352, 283, 336, 151);
 		
 		Label lblSignature = new Label(parent, SWT.NONE);
 		lblSignature.setBounds(10, 477, 55, 15);
 		lblSignature.setText("Signature");
 		
-		txt_Sig = new Text(parent, SWT.BORDER);
+		txt_Sig = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
 		txt_Sig.setBounds(10, 498, 678, 107);
 		
 		Button btn_reset = new Button(parent, SWT.NONE);
