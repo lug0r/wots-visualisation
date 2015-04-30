@@ -7,8 +7,6 @@ Bundle-Activator: wots_visualisierung_1.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.slf4j.api,
- org.bouncycastle,
  org.junit
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
-Import-Package: org.eclipse.wb.swt

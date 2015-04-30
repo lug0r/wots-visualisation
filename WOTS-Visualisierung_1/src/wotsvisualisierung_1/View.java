@@ -22,7 +22,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
-import org.eclipse.wb.swt.SWTResourceManager;
 
 public class View extends ViewPart {
 	public View() {
@@ -35,6 +34,7 @@ public class View extends ViewPart {
 	private Text text_1;
 	private Text txt_Verifkey;
 	private Text txt_Sig;
+	private Text txt_true_false;
 	/**
 	 * @wbp.nonvisual location=214,209
 	 */
@@ -143,7 +143,7 @@ public class View extends ViewPart {
 				
 			    // Set private key of the WOTS-Instance to the one given in the Key-Field
 			    
-				byte[][] privateKey = files.Converter._stringTo2dByte(txt_Sigkey.getText(), instance.getLength());
+				byte[][] privateKey = files.Converter._hexStringTo2dByte(txt_Sigkey.getText(), instance.getLength());
 				instance.setPrivateKey(privateKey);
 				
 				// Sign message and put Signature in Output Field
@@ -169,18 +169,18 @@ public class View extends ViewPart {
 				
 				 // Set public key of the WOTS-Instance to the one given in the Key-Field
 				
-				byte[][] publicKey = files.Converter._stringTo2dByte(txt_Verifkey.getText(), instance.getLength());
+				byte[][] publicKey = files.Converter._hexStringTo2dByte(txt_Verifkey.getText(), instance.getLength());
 				instance.setPublicKey(publicKey);
 				
 				// Get message and signature from Input-fields and set winternitz Parameter to 1 if true || 2 if failed (verification)
 				
 				byte[] message = files.Converter._stringToByte(txt_message.getText());
-				byte[] signature = files.Converter._stringToByte(txt_Sig.getText());
+				byte[] signature = files.Converter._hexStringToByte(txt_Sig.getText());
 				
-				if (instance.verify(message, signature) == true) {
-					txt_winternitzP.setText("1");
+				if (instance.verify(message, signature)) {
+					txt_true_false.setText("Signature verified");
 				} else {
-					txt_winternitzP.setText("2");
+					txt_true_false.setText("Signature rejected");
 				}
 				
 				
@@ -251,8 +251,6 @@ public class View extends ViewPart {
 		lblVerificationKey.setText("Verification key");
 		
 		txt_Sigkey = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
-		txt_Sigkey.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLACK));
-		txt_Sigkey.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
 		txt_Sigkey.setText("");
 		txt_Sigkey.setBounds(10, 283, 336, 151);
 		
@@ -264,7 +262,7 @@ public class View extends ViewPart {
 		lblSignature.setText("Signature");
 		
 		txt_Sig = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
-		txt_Sig.setBounds(10, 498, 678, 107);
+		txt_Sig.setBounds(10, 498, 570, 107);
 		
 		Button btn_reset = new Button(parent, SWT.NONE);
 		btn_reset.addSelectionListener(new SelectionAdapter() {
@@ -276,10 +274,15 @@ public class View extends ViewPart {
 				txt_Sig.setText("");
 				txt_Verifkey.setText("");
 				txt_winternitzP.setText("4");
+				txt_true_false.setText("");
 			}
 		});
 		btn_reset.setBounds(329, 615, 75, 25);
 		btn_reset.setText("Reset");
+		
+		txt_true_false = new Text(parent, SWT.BORDER);
+		txt_true_false.setEditable(false);
+		txt_true_false.setBounds(586, 498, 102, 107);
 		
 
 	}
