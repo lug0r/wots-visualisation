@@ -35,6 +35,8 @@ public class View extends ViewPart {
 	private Text txt_Verifkey;
 	private Text txt_Sig;
 	private Text txt_true_false;
+	
+	
 	/**
 	 * @wbp.nonvisual location=214,209
 	 */
@@ -91,23 +93,18 @@ public class View extends ViewPart {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
-				// Make instance of WinternitzOTS with Winternitz-Paramenter w from Input-Field
+				// Make instance of WinternitzOTS with Winternitz-Paramenter w from Input-Field 
+				// and initializes it to make instance of a PRF to generate Private Key
 				
 				byte[] seed;
 				int w = Integer.parseInt(txt_winternitzP.getText());
-				
 				wots.WinternitzOTS instance = new wots.WinternitzOTS(w);
 				files.PseudorandomFunction prf = new files.AESPRF.AES128();
 				int n = prf.getLength();
 			    SecureRandom sRandom = new SecureRandom();
 			    seed = new byte[n];
-			    
 			    sRandom.nextBytes(seed);
-
-			    byte[] x = new byte[n];
-				
-			    sRandom.nextBytes(x);
-			    instance.init(prf, x);
+			    instance.init(prf);
 			    
 			    // Generate Keys
 			    
@@ -120,7 +117,7 @@ public class View extends ViewPart {
 			}
 		});
 
-		btn_Genkey.setBounds(10, 615, 93, 25);
+		btn_Genkey.setBounds(10, 615, 116, 25);
 		btn_Genkey.setText("Generate keys");
 		
 		Button btnNewButton_1 = new Button(parent, SWT.NONE);
@@ -131,15 +128,7 @@ public class View extends ViewPart {
 				// Make instance of WinternitzOTS with Winternitz-Paramenter w from Input-Field
 				
 				int w = Integer.parseInt(txt_winternitzP.getText());
-				
 				wots.WinternitzOTS instance = new wots.WinternitzOTS(w);
-				
-				files.PseudorandomFunction prf = new files.AESPRF.AES128();
-				int n = prf.getLength();
-			    SecureRandom sRandom = new SecureRandom();
-			    byte[] x = new byte[n];
-			    sRandom.nextBytes(x);
-			    instance.init(prf, x);
 				
 			    // Set private key of the WOTS-Instance to the one given in the Key-Field
 			    
@@ -154,7 +143,7 @@ public class View extends ViewPart {
 			}
 		});
 		btnNewButton_1.setText("Generate signature");
-		btnNewButton_1.setBounds(106, 615, 111, 25);
+		btnNewButton_1.setBounds(132, 615, 146, 25);
 		
 		Button btn_VerifySig = new Button(parent, SWT.NONE);
 		btn_VerifySig.addSelectionListener(new SelectionAdapter() {
@@ -164,7 +153,6 @@ public class View extends ViewPart {
 				// Make instance of WinternitzOTS with Winternitz-Paramenter w from Input-Field
 				
 				int w = Integer.parseInt(txt_winternitzP.getText());
-				
 				wots.WinternitzOTS instance = new wots.WinternitzOTS(w);
 				
 				 // Set public key of the WOTS-Instance to the one given in the Key-Field
@@ -172,13 +160,13 @@ public class View extends ViewPart {
 				byte[][] publicKey = files.Converter._hexStringTo2dByte(txt_Verifkey.getText(), instance.getLength());
 				instance.setPublicKey(publicKey);
 				
-				// Get message and signature from Input-fields and set winternitz Parameter to 1 if true || 2 if failed (verification)
+				// Get message and signature from Input-fields and set result of Verification to Output field
 				
 				byte[] message = files.Converter._stringToByte(txt_message.getText());
 				byte[] signature = files.Converter._hexStringToByte(txt_Sig.getText());
 				
 				if (instance.verify(message, signature)) {
-					txt_true_false.setText("Signature verified");
+					txt_true_false.setText("Signature valid");
 				} else {
 					txt_true_false.setText("Signature rejected");
 				}
@@ -186,16 +174,16 @@ public class View extends ViewPart {
 				
 			}
 		});
-		btn_VerifySig.setBounds(223, 615, 100, 25);
+		btn_VerifySig.setBounds(284, 615, 122, 25);
 		btn_VerifySig.setText("Verify signature");
 		
 		Label lblWotsVisualization = new Label(parent, SWT.NONE);
-		lblWotsVisualization.setBounds(10, 10, 126, 15);
+		lblWotsVisualization.setBounds(10, 10, 140, 21);
 		lblWotsVisualization.setText("WOTS Visualization");
 		
 		Label lblMessage = new Label(parent, SWT.NONE);
-		lblMessage.setBounds(10, 37, 86, 15);
-		lblMessage.setText("Message2");
+		lblMessage.setBounds(10, 37, 86, 25);
+		lblMessage.setText("Message");
 		
 		txt_message = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
 		txt_message.setBounds(9, 58, 679, 96);
@@ -223,11 +211,11 @@ public class View extends ViewPart {
 //			    }
 			}
 		});
-		btnLoadMessageFrom.setBounds(10, 160, 154, 25);
+		btnLoadMessageFrom.setBounds(10, 160, 177, 25);
 		btnLoadMessageFrom.setText("Load message from file");
 		
 		Label lblWinternitzParameterw = new Label(parent, SWT.NONE);
-		lblWinternitzParameterw.setBounds(10, 200, 140, 15);
+		lblWinternitzParameterw.setBounds(10, 200, 140, 24);
 		lblWinternitzParameterw.setText("Winternitz Parameter (w)");
 		
 		txt_winternitzP = new Text(parent, SWT.BORDER);
@@ -235,7 +223,7 @@ public class View extends ViewPart {
 		txt_winternitzP.setBounds(156, 197, 31, 21);
 		
 		Label lblHashFunction = new Label(parent, SWT.NONE);
-		lblHashFunction.setBounds(10, 224, 75, 15);
+		lblHashFunction.setBounds(10, 224, 96, 25);
 		lblHashFunction.setText("Hash function");
 		
 		Combo cmb_Hash = new Combo(parent, SWT.NONE);
@@ -243,11 +231,11 @@ public class View extends ViewPart {
 		cmb_Hash.setText("SHA-1\r");
 		
 		Label lblSignatureKey = new Label(parent, SWT.NONE);
-		lblSignatureKey.setBounds(10, 262, 93, 15);
+		lblSignatureKey.setBounds(10, 262, 93, 25);
 		lblSignatureKey.setText("Signature key");
 		
 		Label lblVerificationKey = new Label(parent, SWT.NONE);
-		lblVerificationKey.setBounds(352, 262, 111, 15);
+		lblVerificationKey.setBounds(352, 262, 111, 25);
 		lblVerificationKey.setText("Verification key");
 		
 		txt_Sigkey = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
@@ -258,7 +246,7 @@ public class View extends ViewPart {
 		txt_Verifkey.setBounds(352, 283, 336, 151);
 		
 		Label lblSignature = new Label(parent, SWT.NONE);
-		lblSignature.setBounds(10, 477, 55, 15);
+		lblSignature.setBounds(10, 477, 75, 28);
 		lblSignature.setText("Signature");
 		
 		txt_Sig = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
@@ -277,10 +265,10 @@ public class View extends ViewPart {
 				txt_true_false.setText("");
 			}
 		});
-		btn_reset.setBounds(329, 615, 75, 25);
+		btn_reset.setBounds(412, 615, 75, 25);
 		btn_reset.setText("Reset");
 		
-		txt_true_false = new Text(parent, SWT.BORDER);
+		txt_true_false = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.CENTER);
 		txt_true_false.setEditable(false);
 		txt_true_false.setBounds(586, 498, 102, 107);
 		

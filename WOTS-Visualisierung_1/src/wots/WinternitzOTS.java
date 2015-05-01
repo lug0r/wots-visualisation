@@ -27,14 +27,13 @@ public class WinternitzOTS implements OTS {
     private int n;
     // Pseudorandom function
     private PseudorandomFunction prf;
-    // Random value
-    private byte[] x;
     // Private key
     private byte[][] privateKey;
     // Public key
     private byte[][] publicKey;
     // Message digest
     private MessageDigest digest;
+    //private byte[][] signature;
 
     /**
      * Creates a new Winternitz OTS.
@@ -43,6 +42,7 @@ public class WinternitzOTS implements OTS {
      */
     public WinternitzOTS(int w) {
 	this.w = w;
+	this.n = 32; // TODO For SHA256, should be dynamic
 
 	try {
 	    digest = MessageDigest.getInstance("SHA-256");
@@ -58,16 +58,9 @@ public class WinternitzOTS implements OTS {
      * Initialize the Winternitz OTS.
      *
      * @param prf Pseudorandom function
-     * @param x Random value X
      */
-    public void init(PseudorandomFunction prf, byte[] x) {
+    public void init(PseudorandomFunction prf) {
 	this.prf = prf;
-	this.x = x;
-	this.n = prf.getLength();
-
-	logger.debug("Using {} as PRF", prf.getClass().getName());
-	logger.debug("n: {}", n);
-	logger.trace("X: {} ({} bytes)", new Object[]{ByteUtils.toHexString(x), x.length});
     }
 
     /**
@@ -100,16 +93,16 @@ public class WinternitzOTS implements OTS {
 	privateKey = new byte[l][n];
 
 	for (int i = 0; i < l; i++) {
-	    byte[] key = new byte[prf.getLength()];
+	    byte[] key = new byte[n];
 	    byte[] input = IntegerUtils.toByteArray(i);
 	    System.arraycopy(input, 0, key, key.length - input.length, input.length);
 	    privateKey[i] = prf.apply(key, seed);
 	}
 
-	logger.debug("Generate private key");
-	logger.trace("SK: {} ...", ByteUtils.toHexString(ByteUtils.convert(privateKey), 10));
-	logger.trace("Seed: {} ...", ByteUtils.toHexString(seed, 10));
-	logger.trace("Private key: {} ({} bytes)", new Object[]{ByteUtils.toHexString(privateKey),});
+	//logger.debug("Generate private key");
+	//logger.trace("SK: {} ...", ByteUtils.toHexString(ByteUtils.convert(privateKey), 10));
+	//logger.trace("Seed: {} ...", ByteUtils.toHexString(seed, 10));
+	//logger.trace("Private key: {} ({} bytes)", new Object[]{ByteUtils.toHexString(privateKey),});
     }
 
     /**
@@ -118,51 +111,16 @@ public class WinternitzOTS implements OTS {
      */
     public void generatePublicKey() {
 	publicKey = new byte[l][n];
-
+	
+	// Hash each parts w-1 times
 	for (int i = 0; i < l; i++) {
-	    byte[] hash = new byte[n];
-	    System.arraycopy(privateKey[i], 0, hash, 0, hash.length);
-
-	    for (int j = 0; j < w - 1; j++) {
-		hash = prf.apply(x, hash);
-	    }
-
-	    publicKey[i] = hash;
+		
+		System.arraycopy(privateKey[i], 0, publicKey[i], 0, publicKey[i].length);
+		
+		for (int j = 0; j < w-1; j++) {
+			publicKey[i] = digest.digest(publicKey[i]);
+		}
 	}
-
-	logger.debug("Generate public key");
-	logger.debug("PK: {} ...", ByteUtils.toHexString(ByteUtils.convert(publicKey), 10));
-	logger.trace("Public key: {} ({} bytes)", new Object[]{ByteUtils.toHexString(publicKey), l * n});
-    }
-
-    /**
-     * Creates a public key from given message and signature.
-     *
-     * @param message Message
-     * @param signature Signature
-     * @return Public key
-     */
-    public byte[][] generatePublicKey(byte[] message, byte[] signature) {
-	byte[][] key = new byte[l][n];
-
-	// Hash message
-	message = digest.digest(message);
-	// Calculate exponent b
-	byte[] b = calculateExponentB(message);
-
-	for (int i = 0; i < l; i++) {
-	    byte[] hash = new byte[n];
-	    System.arraycopy(signature, hash.length * i, hash, 0, hash.length);
-
-	    // Hash x (w - 1 - b_i) times
-	    for (int j = 0; j < (w - 1 - (b[i] & 0xFF)); j++) {
-		hash = prf.apply(x, hash);
-	    }
-
-	    key[i] = hash;
-	}
-
-	return key;
     }
 
     /**
@@ -172,25 +130,24 @@ public class WinternitzOTS implements OTS {
      * @return Signature of the message
      */
     public byte[] sign(byte[] message) {
-	byte[] signature = new byte[l * n];
+	byte[][] tmpSignature = new byte[l][n];
 
 	// Hash message
 	message = digest.digest(message);
 	// Calculate exponent b
 	byte[] b = calculateExponentB(message);
 
+	// Hash each part bi times
 	for (int i = 0; i < l; i++) {
-	    byte[] hash = new byte[n];
-	    System.arraycopy(privateKey[i], 0, hash, 0, hash.length);
-
-	    for (int j = 0; j < (b[i] & 0xFF); j++) {
-		hash = prf.apply(x, hash);
-	    }
-
-	    System.arraycopy(hash, 0, signature, hash.length * i, hash.length);
+		
+			tmpSignature[i] = this.privateKey[i];
+			
+			for (int j = 0; j < (b[i] & 0xFF); j++) {
+				tmpSignature[i] = digest.digest(tmpSignature[i]);
+			}
 	}
-
-	return signature;
+	
+	return files.Converter._hexStringToByte(files.Converter._2dByteToHex(tmpSignature));
     }
 
     /**
@@ -205,22 +162,22 @@ public class WinternitzOTS implements OTS {
 	message = digest.digest(message);
 	// Calculate exponent b
 	byte[] b = calculateExponentB(message);
-
+	
+	byte[][] tmpSignature = files.Converter._hexStringTo2dByte((files.Converter._byteToHex(signature)), l);
+	
+	// Hash each part w-1-bi times and verifies it with public Key
 	for (int i = 0; i < l; i++) {
-	    byte[] hash = new byte[n];
-	    System.arraycopy(signature, hash.length * i, hash, 0, hash.length);
 
-	    // Hash x (w - 1 - b_i) times
 	    for (int j = 0; j < (w - 1 - (b[i] & 0xFF)); j++) {
-		hash = prf.apply(x, hash);
+	    	tmpSignature[i] = digest.digest(tmpSignature[i]);
 	    }
 
 	    // Compare sigma_i with pk_i
-	    if (!Arrays.equals(hash, publicKey[i])) {
-		return false;
+	    if (!Arrays.equals(tmpSignature[i], publicKey[i])) {
+	    	return false;
 	    }
 	}
-
+	
 	return true;
     }
 
@@ -233,8 +190,8 @@ public class WinternitzOTS implements OTS {
 	l2 = (int) Math.floor(MathUtils.log2(l1 * (w - 1)) / MathUtils.log2(w)) + 1;
 	l = l1 + l2;
 
-	logger.debug("Using Winternitz OTS with w={} and m={}", new Object[]{w, m});
-	logger.debug("Lengths are: l1={}, l2={}, and l={}", new Object[]{l1, l2, l});
+	//logger.debug("Using Winternitz OTS with w={} and m={}", new Object[]{w, m});
+	//logger.debug("Lengths are: l1={}, l2={}, and l={}", new Object[]{l1, l2, l});
     }
 
     /**
@@ -324,10 +281,18 @@ public class WinternitzOTS implements OTS {
 	return m;
     }
     
+    /**
+     * Allows to set a custom Private Key
+     * @param p
+     */
     public void setPrivateKey(byte[][] p) {
     	this.privateKey = p;
     }
     
+    /**
+     * Allows to set a custom Public Key
+     * @param p
+     */
     public void setPublicKey(byte[][] p) {
     	this.publicKey = p;
     }
