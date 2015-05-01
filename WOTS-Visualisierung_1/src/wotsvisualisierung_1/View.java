@@ -1,10 +1,18 @@
 package wotsvisualisierung_1;
 
+import java.awt.Container;
+import java.awt.MediaTracker;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.security.SecureRandom;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -13,10 +21,12 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISharedImages;
@@ -31,11 +41,10 @@ public class View extends ViewPart {
 	public Text txt_message;
 	private Text txt_winternitzP;
 	private Text txt_Sigkey;
-	private Text text_1;
 	private Text txt_Verifkey;
 	private Text txt_Sig;
 	private Text txt_true_false;
-	
+	private Label img_right;
 	
 	/**
 	 * @wbp.nonvisual location=214,209
@@ -93,8 +102,13 @@ public class View extends ViewPart {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
+				// Set Image
+				
+				Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Key_Generation.PNG");
+				img_right.setImage(img);
+				
 				// Make instance of WinternitzOTS with Winternitz-Paramenter w from Input-Field 
-				// and initializes it to make instance of a PRF to generate Private Key
+				// and initializes it to make instance of a PRF to generate 
 				
 				byte[] seed;
 				int w = Integer.parseInt(txt_winternitzP.getText());
@@ -125,6 +139,11 @@ public class View extends ViewPart {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
+				// Set Image
+				
+				Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Signature_Generation.PNG");
+				img_right.setImage(img);
+				
 				// Make instance of WinternitzOTS with Winternitz-Paramenter w from Input-Field
 				
 				int w = Integer.parseInt(txt_winternitzP.getText());
@@ -149,6 +168,11 @@ public class View extends ViewPart {
 		btn_VerifySig.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				
+				// Set Image
+				
+				Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Signature_Verification.PNG");
+				img_right.setImage(img);
 				
 				// Make instance of WinternitzOTS with Winternitz-Paramenter w from Input-Field
 				
@@ -263,6 +287,8 @@ public class View extends ViewPart {
 				txt_Verifkey.setText("");
 				txt_winternitzP.setText("4");
 				txt_true_false.setText("");
+				Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Overview2.PNG");
+				img_right.setImage(img);
 			}
 		});
 		btn_reset.setBounds(412, 615, 75, 25);
@@ -272,7 +298,11 @@ public class View extends ViewPart {
 		txt_true_false.setEditable(false);
 		txt_true_false.setBounds(586, 498, 102, 107);
 		
-
+		img_right = new Label(parent, 0);
+		img_right.setBounds(746, 330, 453, 275);
+		Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Overview2.PNG");
+		img_right.setImage(img);
+		
 	}
 
 	/**
