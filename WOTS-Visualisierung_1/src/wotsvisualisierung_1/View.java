@@ -45,6 +45,9 @@ public class View extends ViewPart {
 	private Text txt_Sig;
 	private Text txt_true_false;
 	private Label img_right;
+	private Button btnWots;
+	private Button btnWotsPlus;
+	
 	
 	/**
 	 * @wbp.nonvisual location=214,209
@@ -102,6 +105,8 @@ public class View extends ViewPart {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
+				if (btnWots.getSelection() && !btnWotsPlus.getSelection()) {
+				
 				// Set Image
 				
 				Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Key_Generation.PNG");
@@ -128,6 +133,13 @@ public class View extends ViewPart {
 			    // Put keys into Key-Fields
 			    txt_Sigkey.setText(files.Converter._2dByteToHex(instance.getPrivateKey()));
 			    txt_Verifkey.setText(files.Converter._2dByteToHex(instance.getPublicKey()));
+			    
+			    
+				} else if (!btnWots.isEnabled() && btnWotsPlus.isEnabled()) {
+					txt_Sigkey.setText("WOTS+");
+				} else {
+					txt_Sigkey.setText("Pls choose either WOTS or WOTS+, you fucker");
+				}
 			}
 		});
 
@@ -302,6 +314,14 @@ public class View extends ViewPart {
 		img_right.setBounds(746, 330, 453, 275);
 		Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Overview2.PNG");
 		img_right.setImage(img);
+		
+		Button btnWots = new Button(parent, SWT.CHECK);
+		btnWots.setBounds(352, 200, 111, 20);
+		btnWots.setText("WOTS");
+		
+		Button btnWotsPlus = new Button(parent, SWT.CHECK);
+		btnWotsPlus.setBounds(352, 229, 111, 20);
+		btnWotsPlus.setText("WOTS+");
 		
 	}
 
