@@ -320,7 +320,7 @@ public class View extends ViewPart {
 		lblWotsVisualization.setText("WOTS Visualization");
 		
 		Label lblMessage = new Label(parent, SWT.NONE);
-		lblMessage.setBounds(10, 37, 86, 25);
+		lblMessage.setBounds(10, 37, 86, 21);
 		lblMessage.setText("Message");
 		
 		txt_message = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
