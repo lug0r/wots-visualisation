@@ -49,7 +49,7 @@ public class View extends ViewPart {
 	private Label img_right;
 	private Button btnWots;
 	private Button btnWotsPlus;
-	private Label txt_Output;
+	private Text txt_Output;
 	
 	
 	/**
@@ -443,8 +443,9 @@ public class View extends ViewPart {
 		btnWotsPlus.setBounds(352, 217, 111, 20);
 		btnWotsPlus.setText("WOTS+");
 		
-		txt_Output = new Label(parent, SWT.NONE);
-		txt_Output.setBounds(723, 37, 483, 224);
+		txt_Output = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.MULTI);
+		txt_Output.setEditable(false);
+		txt_Output.setBounds(723, 58, 483, 191);
 		txt_Output.setText("This is the welcome message of our plugin, please insert something which makes more sense!");
 
 		
