@@ -115,10 +115,6 @@ public class WOTSPlus {
     public void generatePublicKey(byte[] seed) {
 	publicKey = new byte[l+w-1][n];
 	
-	// TODO
-	System.out.println("Key Generation:" + "\nPrivateKey: " + files.Converter._byteToHex(privateKey[0]));
-	
-	
 	// Generate r and apply to public Key
 	
 	//r = new byte[w-1][n];
@@ -142,11 +138,6 @@ public class WOTSPlus {
 				publicKey[i][k] = (byte) (publicKey[i][k] ^ publicKey[j][k]);
 			
 			publicKey[i] = digest.digest(publicKey[i]);
-			
-			// TODO
-			if (i == w-1) {
-				System.out.println(files.Converter._byteToHex(publicKey[w-1]));
-			}
 		}
 	}
     }
@@ -160,10 +151,6 @@ public class WOTSPlus {
      */
     public byte[] sign(byte[] message) {
 	byte[][] tmpSignature = new byte[l][n];
-
-	// TODO
-	System.out.println("\nSignature:");
-	
 	
 	// Hash message
 	message = digest.digest(message);
@@ -181,11 +168,6 @@ public class WOTSPlus {
 					tmpSignature[i][k] = (byte) (tmpSignature[i][k] ^ publicKey[j][k]);
 				
 				tmpSignature[i] = digest.digest(tmpSignature[i]);
-				
-				// TODO
-				if (i == 0) {
-					System.out.println(files.Converter._byteToHex(tmpSignature[i]));
-				}
 			}
 	}
 	
@@ -201,9 +183,6 @@ public class WOTSPlus {
      */
     public boolean verify(byte[] message, byte[] signature) {
 	
-    // TODO
-    System.out.println("\nVerify:");
-    	
     // Hash message
 	message = digest.digest(message);
 	// Calculate exponent b
@@ -211,24 +190,15 @@ public class WOTSPlus {
 	
 	byte[][] tmpSignature = files.Converter._hexStringTo2dByte((files.Converter._byteToHex(signature)), l);
 	
-	// TODO
-	System.out.println("Signatur: " + files.Converter._byteToHex(signature));
-	
-	
 	// Hash + xor each part w-1-bi times and verifies it with public Key
 	for (int i = 0; i < l; i++) {
 
 	    for (int j = 0; j < (w - 1 - (b[i] & 0xFF)); j++) {
 	    	
 	    	for( int k = 0; k < tmpSignature[i].length; k++ )
-				tmpSignature[i][k] = (byte) (tmpSignature[i][k] ^ publicKey[j][k]);
+				tmpSignature[i][k] = (byte) (tmpSignature[i][k] ^ publicKey[j+(b[i] & 0xFF)][k]);
 	    	
 	    	tmpSignature[i] = digest.digest(tmpSignature[i]);
-	    	
-	    	// TODO
-			if (i == 0) {
-				System.out.println(files.Converter._byteToHex(tmpSignature[i]));
-			}
 	    }
 
 	    // Compare sigma_i with pk_i

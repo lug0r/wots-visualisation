@@ -142,7 +142,7 @@ public class View extends ViewPart {
 					
 					// Set Image
 					
-					img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/Key_Generation.PNG"));
+					img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/WOTSPlus.PNG"));
 //					Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Key_Generation.PNG");
 //					img_right.setImage(img);
 					
@@ -211,7 +211,7 @@ public class View extends ViewPart {
 					
 					// Set Image
 					
-					img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/Signature_Generation.PNG"));
+					img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/WOTSPlus.PNG"));
 //					Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Signature_Generation.PNG");
 //					img_right.setImage(img);
 					
@@ -278,7 +278,7 @@ public class View extends ViewPart {
 					
 					// Set Image
 					
-					img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/Signature_Verification.PNG"));
+					img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/WOTSPlus.PNG"));
 //					Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Signature_Verification.PNG");
 //					img_right.setImage(img);
 					
@@ -329,31 +329,31 @@ public class View extends ViewPart {
 		Button btnLoadMessageFrom = new Button(parent, SWT.NONE);
 		btnLoadMessageFrom.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-//				JFileChooser chooser = new JFileChooser();
-//			    //FileNameExtensionFilter filter = new FileNameExtensionFilter(
-//			    //    "JPG & GIF Images", "jpg", "gif");
-//			    //chooser.setFileFilter(filter);
-//			    int returnVal = chooser.showOpenDialog(null);
-//			    if(returnVal == JFileChooser.APPROVE_OPTION) {
-//			       System.out.println("You chose to open this file: " +
-//			            chooser.getSelectedFile().getName());
-//			       
-//			       File file = chooser.getSelectedFile();
-//			       String path = file.getAbsolutePath();
-//			       try {
-//						txt_message.setText(files.WotsComposite.readFile(path));
-//					} catch (IOException e1) {
-//						// TODO Auto-generated catch block
-//						e1.printStackTrace();
-//					}
-//			    }
+				JFileChooser chooser = new JFileChooser();
+			    //FileNameExtensionFilter filter = new FileNameExtensionFilter(
+			    //    "JPG & GIF Images", "jpg", "gif");
+			    //chooser.setFileFilter(filter);
+			    int returnVal = chooser.showOpenDialog(null);
+			    if(returnVal == JFileChooser.APPROVE_OPTION) {
+			       System.out.println("You chose to open this file: " +
+			            chooser.getSelectedFile().getName());
+			       
+			       File file = chooser.getSelectedFile();
+			       String path = file.getAbsolutePath();
+			       try {
+						txt_message.setText(files.WotsComposite.readFile(path));
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+			    }
 			}
 		});
 		btnLoadMessageFrom.setBounds(10, 160, 177, 25);
 		btnLoadMessageFrom.setText("Load message from file");
 		
 		Label lblWinternitzParameterw = new Label(parent, SWT.NONE);
-		lblWinternitzParameterw.setBounds(10, 200, 140, 24);
+		lblWinternitzParameterw.setBounds(10, 200, 140, 21);
 		lblWinternitzParameterw.setText("Winternitz Parameter (w)");
 		
 		txt_winternitzP = new Text(parent, SWT.BORDER);
@@ -366,14 +366,14 @@ public class View extends ViewPart {
 		
 		Combo cmb_Hash = new Combo(parent, SWT.NONE);
 		cmb_Hash.setBounds(112, 221, 75, 23);
-		cmb_Hash.setText("SHA-1\r");
+		cmb_Hash.setText("SHA-256");
 		
 		Label lblSignatureKey = new Label(parent, SWT.NONE);
-		lblSignatureKey.setBounds(10, 262, 93, 25);
+		lblSignatureKey.setBounds(10, 262, 93, 20);
 		lblSignatureKey.setText("Signature key");
 		
 		Label lblVerificationKey = new Label(parent, SWT.NONE);
-		lblVerificationKey.setBounds(352, 262, 111, 25);
+		lblVerificationKey.setBounds(352, 262, 111, 20);
 		lblVerificationKey.setText("Verification key");
 		
 		txt_Sigkey = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
@@ -384,7 +384,7 @@ public class View extends ViewPart {
 		txt_Verifkey.setBounds(352, 283, 336, 151);
 		
 		Label lblSignature = new Label(parent, SWT.NONE);
-		lblSignature.setBounds(10, 477, 75, 28);
+		lblSignature.setBounds(10, 477, 75, 21);
 		lblSignature.setText("Signature");
 		
 		txt_Sig = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
@@ -412,10 +412,10 @@ public class View extends ViewPart {
 		txt_true_false = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.CENTER);
 		txt_true_false.setEditable(false);
 		txt_true_false.setBounds(586, 498, 102, 107);
-		
+		txt_message.setText("standard message");
 		img_right = new Label(parent, 0);
-		img_right.setBounds(746, 330, 453, 310);
-		img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "img/Overview2.PNG"));
+		img_right.setBounds(723, 283, 483, 322);
+		img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/Overview2.PNG"));
 
 //		Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Overview2.PNG");
 //		img_right.setImage(img);
@@ -428,6 +428,9 @@ public class View extends ViewPart {
 		btnWotsPlus = new Button(parent, SWT.RADIO);
 		btnWotsPlus.setBounds(352, 217, 111, 20);
 		btnWotsPlus.setText("WOTS+");
+		
+		Label lblNewLabel = new Label(parent, SWT.NONE);
+		lblNewLabel.setBounds(723, 37, 483, 224);
 
 		
 	}
