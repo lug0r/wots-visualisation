@@ -49,6 +49,7 @@ public class View extends ViewPart {
 	private Label img_right;
 	private Button btnWots;
 	private Button btnWotsPlus;
+	private Label txt_Output;
 	
 	
 	/**
@@ -109,7 +110,9 @@ public class View extends ViewPart {
 				
 				if (btnWots.getSelection() && !btnWotsPlus.getSelection()) {
 				
-					// Set Image
+					// Set Image & Output field
+					
+					txt_Output.setText("This message should explain the WOTS Key-Generation.");
 					
 					img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/Key_Generation.PNG"));
 //					Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Key_Generation.PNG");
@@ -140,7 +143,9 @@ public class View extends ViewPart {
 			    
 				} else if (!btnWots.getSelection() && btnWotsPlus.getSelection()) {
 					
-					// Set Image
+					// Set Image & Output field
+					
+					txt_Output.setText("This message should explain the WOTS+ Key-Generation.");
 					
 					img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/WOTSPlus.PNG"));
 //					Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Key_Generation.PNG");
@@ -186,7 +191,9 @@ public class View extends ViewPart {
 				
 				if (btnWots.getSelection() && !btnWotsPlus.getSelection()) {
 				
-					// Set Image
+					// Set Image & Output field
+					
+					txt_Output.setText("This message should explain the WOTS Signature-Generation.");
 				
 					img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/Signature_Generation.PNG"));
 //					Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Signature_Generation.PNG");
@@ -209,7 +216,9 @@ public class View extends ViewPart {
 					
 				} else if (!btnWots.getSelection() && btnWotsPlus.getSelection()) {
 					
-					// Set Image
+					// Set Image & Output field
+					
+					txt_Output.setText("This message should explain the WOTS+ Key-Generation.");
 					
 					img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/WOTSPlus.PNG"));
 //					Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Signature_Generation.PNG");
@@ -248,7 +257,9 @@ public class View extends ViewPart {
 				
 				if (btnWots.getSelection() && !btnWotsPlus.getSelection()) {
 				
-					// Set Image
+					// Set Image & Output field 
+					
+					txt_Output.setText("This message should explain the WOTS Signature-Verification.");
 				
 					img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/Signature_Verification.PNG"));
 //					Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Signature_Verification.PNG");
@@ -276,7 +287,9 @@ public class View extends ViewPart {
 					}
 				} else if (!btnWots.getSelection() && btnWotsPlus.getSelection()) {
 					
-					// Set Image
+					// Set Image & Output field
+					
+					txt_Output.setText("This message should explain the WOTS+ Signature-Verification.");
 					
 					img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/WOTSPlus.PNG"));
 //					Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Signature_Verification.PNG");
@@ -401,6 +414,7 @@ public class View extends ViewPart {
 				txt_Verifkey.setText("");
 				txt_winternitzP.setText("4");
 				txt_true_false.setText("");
+				txt_Output.setText("This is the welcome message of our plugin, please insert something which makes more sense!");
 				img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/Overview2.PNG"));
 //				Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Overview2.PNG");
 //				img_right.setImage(img);
@@ -429,8 +443,9 @@ public class View extends ViewPart {
 		btnWotsPlus.setBounds(352, 217, 111, 20);
 		btnWotsPlus.setText("WOTS+");
 		
-		Label lblNewLabel = new Label(parent, SWT.NONE);
-		lblNewLabel.setBounds(723, 37, 483, 224);
+		txt_Output = new Label(parent, SWT.NONE);
+		txt_Output.setBounds(723, 37, 483, 224);
+		txt_Output.setText("This is the welcome message of our plugin, please insert something which makes more sense!");
 
 		
 	}
