@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.wb.swt.ResourceManager;
 
 public class View extends ViewPart {
 	public View() {
@@ -103,9 +104,7 @@ public class View extends ViewPart {
 			public void widgetSelected(SelectionEvent e) {
 				
 				// Set Image
-				
-				Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Key_Generation.PNG");
-				img_right.setImage(img);
+				img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "img/Key_Generation.PNG"));			
 				
 				// Make instance of WinternitzOTS with Winternitz-Paramenter w from Input-Field 
 				// and initializes it to make instance of a PRF to generate 
@@ -140,9 +139,8 @@ public class View extends ViewPart {
 			public void widgetSelected(SelectionEvent e) {
 				
 				// Set Image
-				
-				Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Signature_Generation.PNG");
-				img_right.setImage(img);
+
+				img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "img/Signature_Generation.PNG"));
 				
 				// Make instance of WinternitzOTS with Winternitz-Paramenter w from Input-Field
 				
@@ -170,10 +168,9 @@ public class View extends ViewPart {
 			public void widgetSelected(SelectionEvent e) {
 				
 				// Set Image
-				
-				Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Signature_Verification.PNG");
-				img_right.setImage(img);
-				
+
+				img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "img/Signature_Verification.PNG"));
+
 				// Make instance of WinternitzOTS with Winternitz-Paramenter w from Input-Field
 				
 				int w = Integer.parseInt(txt_winternitzP.getText());
@@ -287,8 +284,8 @@ public class View extends ViewPart {
 				txt_Verifkey.setText("");
 				txt_winternitzP.setText("4");
 				txt_true_false.setText("");
-				Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Overview2.PNG");
-				img_right.setImage(img);
+
+				img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "img/Overview2.PNG"));
 			}
 		});
 		btn_reset.setBounds(412, 615, 75, 25);
@@ -299,9 +296,14 @@ public class View extends ViewPart {
 		txt_true_false.setBounds(586, 498, 102, 107);
 		
 		img_right = new Label(parent, 0);
-		img_right.setBounds(746, 330, 453, 275);
-		Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Overview2.PNG");
-		img_right.setImage(img);
+		img_right.setBounds(713, 283, 486, 322);
+		img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "img/Overview2.PNG"));
+
+		Label label = new Label(parent, 0);
+		
+		Label lblFancyTextmessage = new Label(parent, SWT.NONE);
+		lblFancyTextmessage.setBounds(713, 10, 479, 239);
+		lblFancyTextmessage.setText("Fancy Textmessage");
 		
 	}
 
