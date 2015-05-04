@@ -1,19 +1,10 @@
 package wotsvisualisierung_1;
 
-import java.awt.Container;
-import java.awt.MediaTracker;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.security.SecureRandom;
 
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -22,12 +13,10 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISharedImages;
