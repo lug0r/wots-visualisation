@@ -44,6 +44,8 @@ public class View extends ViewPart {
 	private boolean details = false;
 	private Label lblMessageHash;
 	private Label lblBi;
+	private Button btnHash;
+	private Button btn_CalcB;
 	
 	
 	/**
@@ -102,8 +104,10 @@ public class View extends ViewPart {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
-				if (btnWots.getSelection() && !btnWotsPlus.getSelection()) {
+				// KEY GENERATION
 				
+				if (btnWots.getSelection() && !btnWotsPlus.getSelection()) {
+					
 					// Set Image & Output field
 					
 					txt_Output.setText("This message should explain the WOTS Key-Generation.");
@@ -183,6 +187,8 @@ public class View extends ViewPart {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
+				// SIGNATURE GENERATION
+				
 				if (btnWots.getSelection() && !btnWotsPlus.getSelection()) {
 				
 					// Set Image & Output field
@@ -202,14 +208,18 @@ public class View extends ViewPart {
 					
 					byte[][] privateKey = files.Converter._hexStringTo2dByte(txt_Sigkey.getText(), instance.getLength());
 					instance.setPrivateKey(privateKey);
-				
-					// Sign message and put Signature in Output Field
-				
-					byte[] message = files.Converter._stringToByte(txt_message.getText());
-					txt_Sig.setText(files.Converter._byteToHex(instance.sign(message)));
 					
-					txt_Hash.setText(instance.getHash(txt_message.getText()));
-					txt_Bi.setText(instance.getBi(txt_message.getText()));
+					// Hash message and set txt_Hash + Calculate bi and set txt_bi if necessary
+					if (!details) {
+						txt_Hash.setText(instance.getHash(txt_message.getText()));
+						txt_Bi.setText(instance.getBi(txt_Hash.getText()));
+					}
+					
+					// Sign message and put Signature in Output Field
+					byte[] message = files.Converter._hexStringToByte(txt_Hash.getText());
+					txt_Sig.setText(files.Converter._byteToHex(instance.sign(message, files.Converter._hexStringToByte(txt_Bi.getText()))));
+					
+					
 					
 				} else if (!btnWots.getSelection() && btnWotsPlus.getSelection()) {
 					
@@ -233,13 +243,17 @@ public class View extends ViewPart {
 					byte[][] publicKey = files.Converter._hexStringTo2dByte(txt_Verifkey.getText(), (instance.getLength() + w-1));
 					instance.setPublicKey(publicKey);
 					
+					// Hash message and set txt_Hash + Calculate bi and set txt_bi if necessary
+					if (!details) {
+						txt_Hash.setText(instance.getHash(txt_message.getText()));
+						txt_Bi.setText(instance.getBi(txt_Hash.getText()));
+					}
+					
 					// Sign message and put Signature in Output Field
 				
-					byte[] message = files.Converter._stringToByte(txt_message.getText());
-					txt_Sig.setText(files.Converter._byteToHex(instance.sign(message)));
+					byte[] message = files.Converter._hexStringToByte(txt_Hash.getText());
+					txt_Sig.setText(files.Converter._byteToHex(instance.sign(message, files.Converter._hexStringToByte(txt_Bi.getText()))));
 					
-					txt_Hash.setText(instance.getHash(txt_message.getText()));
-					txt_Bi.setText(instance.getBi(txt_message.getText()));
 					
 				} else {
 					
@@ -255,6 +269,8 @@ public class View extends ViewPart {
 		btn_VerifySig.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				
+				// SIGNATURE VERIFICATION
 				
 				if (btnWots.getSelection() && !btnWotsPlus.getSelection()) {
 				
@@ -275,20 +291,23 @@ public class View extends ViewPart {
 				
 					byte[][] publicKey = files.Converter._hexStringTo2dByte(txt_Verifkey.getText(), instance.getLength());
 					instance.setPublicKey(publicKey);
+					
+					// Hash message and set txt_Hash + Calculate bi and set txt_bi if necessary
+					if (!details) {
+						txt_Hash.setText(instance.getHash(txt_message.getText()));
+						txt_Bi.setText(instance.getBi(txt_Hash.getText()));
+					}
 				
 					// Get message and signature from Input-fields and set result of Verification to Output field
 				
-					byte[] message = files.Converter._stringToByte(txt_message.getText());
+					byte[] message = files.Converter._hexStringToByte(txt_Hash.getText());
 					byte[] signature = files.Converter._hexStringToByte(txt_Sig.getText());
 				
-					if (instance.verify(message, signature)) {
+					if (instance.verify(message, signature, files.Converter._hexStringToByte(txt_Bi.getText()))) {
 						txt_true_false.setText("Signature valid");
 					} else {
 						txt_true_false.setText("Signature rejected");
 					}
-					
-					txt_Hash.setText(instance.getHash(txt_message.getText()));
-					txt_Bi.setText(instance.getBi(txt_message.getText()));
 					
 				} else if (!btnWots.getSelection() && btnWotsPlus.getSelection()) {
 					
@@ -310,19 +329,22 @@ public class View extends ViewPart {
 					byte[][] publicKey = files.Converter._hexStringTo2dByte(txt_Verifkey.getText(), (instance.getLength() + w-1));
 					instance.setPublicKey(publicKey);
 					
+					// Hash message and set txt_Hash + Calculate bi and set txt_bi if necessary
+					if (!details) {
+						txt_Hash.setText(instance.getHash(txt_message.getText()));
+						txt_Bi.setText(instance.getBi(txt_Hash.getText()));
+					}
+					
 					// Get message and signature from Input-fields and set result of Verification to Output field
 					
-					byte[] message = files.Converter._stringToByte(txt_message.getText());
+					byte[] message = files.Converter._hexStringToByte(txt_Hash.getText());
 					byte[] signature = files.Converter._hexStringToByte(txt_Sig.getText());
 				
-					if (instance.verify(message, signature)) {
+					if (instance.verify(message, signature, files.Converter._hexStringToByte(txt_Bi.getText()))) {
 						txt_true_false.setText("Signature valid");
 					} else {
 						txt_true_false.setText("Signature rejected");
 					}
-					
-					txt_Hash.setText(instance.getHash(txt_message.getText()));
-					txt_Bi.setText(instance.getBi(txt_message.getText()));
 					
 				} else {
 					
@@ -464,6 +486,10 @@ public class View extends ViewPart {
 				
 				if (!details) {
 					
+					// Explains what is different to normal Version
+					
+					txt_Output.setText("This is a more detailed view of the WOTS/WOTS+ algorithm. In this view you are able to take a look and edit the hash of the message and the calculated Bitstring Bi.\nTo use the detailed version properly, you have to generate the Hash and the Bitstring Bi manually by clicking on the Buttons \"Hash Message\" and \"Calculate Bi\".");
+					
 					// Sets the View to a more detailed Version
 					
 					details = true;
@@ -480,6 +506,12 @@ public class View extends ViewPart {
 					lblBi.setEnabled(true);
 					lblBi.setVisible(true);
 					
+					btnHash.setEnabled(true);
+					btnHash.setVisible(true);
+					
+					btn_CalcB.setEnabled(true);
+					btn_CalcB.setVisible(true);
+					
 					// Compress txt_fields to fit detailed view
 					
 					txt_message.setBounds(9, 58, 337, 96);
@@ -487,6 +519,10 @@ public class View extends ViewPart {
 					txt_Verifkey.setBounds(352, 283, 336, 75);
 					
 				} else if (details) {
+					
+					// States that now the normal view is showed
+					
+					txt_Output.setText("You switched back to the normal view of the WOTS/WOTS+ algorithm.");
 					
 					// Hides the details shown before
 					
@@ -503,6 +539,12 @@ public class View extends ViewPart {
 					
 					lblBi.setEnabled(false);
 					lblBi.setVisible(false);
+					
+					btnHash.setEnabled(false);
+					btnHash.setVisible(false);
+					
+					btn_CalcB.setEnabled(false);
+					btn_CalcB.setVisible(false);
 					
 					// Set sizes back to original
 					
@@ -540,6 +582,44 @@ public class View extends ViewPart {
 		lblBi.setText("Bi");
 		lblBi.setEnabled(false);
 		lblBi.setVisible(false);
+		
+		btnHash = new Button(parent, SWT.NONE);
+		btnHash.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				// Make instance of WinternitzOTS with Winternitz-Paramenter w from Input-Field
+				
+				int w = Integer.parseInt(txt_winternitzP.getText());
+				wots.WOTSPlus instance = new wots.WOTSPlus(w);
+				
+				// Hash message and set txt_Hash
+				txt_Hash.setText(instance.getHash(txt_message.getText()));
+			}
+		});
+		btnHash.setBounds(193, 160, 116, 25);
+		btnHash.setText("Hash Message");
+		btnHash.setEnabled(false);
+		btnHash.setVisible(false);
+		
+		btn_CalcB = new Button(parent, SWT.NONE);
+		btn_CalcB.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				// Make instance of WinternitzOTS with Winternitz-Paramenter w from Input-Field
+				
+				int w = Integer.parseInt(txt_winternitzP.getText());
+				wots.WOTSPlus instance = new wots.WOTSPlus(w);
+				
+				// Calculate Bi's and set txt_Bi
+				txt_Bi.setText(instance.getBi((txt_Hash.getText())));
+			}
+		});
+		btn_CalcB.setBounds(316, 160, 111, 25);
+		btn_CalcB.setText("Calculate Bi's");
+		btn_CalcB.setEnabled(false);
+		btn_CalcB.setVisible(false);
 
 		
 	}

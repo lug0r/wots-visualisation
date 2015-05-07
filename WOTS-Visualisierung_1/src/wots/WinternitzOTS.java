@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Moritz Horsch <horsch@cdc.informatik.tu-darmstadt.de>
  */
-public class WinternitzOTS implements OTS {
+public class WinternitzOTS {
 
     // Logger
     private static final Logger logger = LoggerFactory.getLogger(WinternitzOTS.class);
@@ -129,13 +129,16 @@ public class WinternitzOTS implements OTS {
      * @param message Message
      * @return Signature of the message
      */
-    public byte[] sign(byte[] message) {
+    public byte[] sign(byte[] message, byte[] b) {
 	byte[][] tmpSignature = new byte[l][n];
 
 	// Hash message
-	message = digest.digest(message);
+	// byte[] message2 = digest.digest(message);
+	// System.out.println("Hash within sign():\n" + files.Converter._byteToHex(message2) + "\n" + message2.length);
+	
+	
 	// Calculate exponent b
-	byte[] b = calculateExponentB(message);
+	// byte[] b = calculateExponentB(message);
 
 	// Hash each part bi times
 	for (int i = 0; i < l; i++) {
@@ -157,11 +160,14 @@ public class WinternitzOTS implements OTS {
      * @param signature Signature
      * @return True if the signature is valid, otherwise false
      */
-    public boolean verify(byte[] message, byte[] signature) {
-	// Hash message
-	message = digest.digest(message);
+    public boolean verify(byte[] message, byte[] signature, byte[] b) {
+	
+    // Hash message
+	// message = digest.digest(message);
+	
+	
 	// Calculate exponent b
-	byte[] b = calculateExponentB(message);
+	//byte[] b = calculateExponentB(message);
 	
 	byte[][] tmpSignature = files.Converter._hexStringTo2dByte((files.Converter._byteToHex(signature)), l);
 	
@@ -312,7 +318,10 @@ public class WinternitzOTS implements OTS {
      * @return
      */
     public String getBi(String message) {
-    	byte[] m = digest.digest(files.Converter._stringToByte(message));
+    	byte[] m = digest.digest(files.Converter._hexStringToByte(message));
+    	
+    	//System.out.println("Länge nach getHash(): " +  m.length);
+    	
     	return files.Converter._byteToHex(calculateExponentB(m));
     }
 }
