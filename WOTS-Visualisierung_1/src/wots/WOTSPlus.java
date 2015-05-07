@@ -151,13 +151,14 @@ public class WOTSPlus {
      * @param message Message
      * @return Signature of the message
      */
-    public byte[] sign(byte[] message) {
+    public byte[] sign(byte[] message, byte[] b) {
 	byte[][] tmpSignature = new byte[l][n];
 	
 	// Hash message
-	message = digest.digest(message);
+	// message = digest.digest(message);
+	
 	// Calculate exponent b
-	byte[] b = calculateExponentB(message);
+	// byte[] b = calculateExponentB(message);
 
 	// Hash each part bi times
 	for (int i = 0; i < l; i++) {
@@ -183,12 +184,14 @@ public class WOTSPlus {
      * @param signature Signature
      * @return True if the signature is valid, otherwise false
      */
-    public boolean verify(byte[] message, byte[] signature) {
+    public boolean verify(byte[] message, byte[] signature, byte[] b) {
 	
     // Hash message
-	message = digest.digest(message);
+	// message = digest.digest(message);
+	
+	
 	// Calculate exponent b
-	byte[] b = calculateExponentB(message);
+	// byte[] b = calculateExponentB(message);
 	
 	byte[][] tmpSignature = files.Converter._hexStringTo2dByte((files.Converter._byteToHex(signature)), l);
 	
@@ -346,7 +349,7 @@ public class WOTSPlus {
      * @return
      */
     public String getBi(String message) {
-    	byte[] m = digest.digest(files.Converter._stringToByte(message));
+    	byte[] m = digest.digest(files.Converter._hexStringToByte(message));
     	return files.Converter._byteToHex(calculateExponentB(m));
     }
 }
