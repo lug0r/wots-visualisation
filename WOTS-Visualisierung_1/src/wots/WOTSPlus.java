@@ -4,11 +4,13 @@ import files.PseudorandomFunction;
 import files.ByteUtils;
 import files.IntegerUtils;
 import files.MathUtils;
+
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -327,5 +329,24 @@ public class WOTSPlus {
      */
     public void setPublicKey(byte[][] p) {
     	this.publicKey = p;
+    }
+    
+    /**
+     * returns hash of given String
+     * @param message
+     * @return
+     */
+    public String getHash(String message) {
+    	return files.Converter._byteToHex(digest.digest(files.Converter._stringToByte(message)));
+    }
+    
+    /** 
+     * returns the calculated bi from a given message
+     * @param message
+     * @return
+     */
+    public String getBi(String message) {
+    	byte[] m = digest.digest(files.Converter._stringToByte(message));
+    	return files.Converter._byteToHex(calculateExponentB(m));
     }
 }

@@ -296,4 +296,23 @@ public class WinternitzOTS implements OTS {
     public void setPublicKey(byte[][] p) {
     	this.publicKey = p;
     }
+    
+    /**
+     * returns hash of given String
+     * @param message
+     * @return
+     */
+    public String getHash(String message) {
+    	return files.Converter._byteToHex(digest.digest(files.Converter._stringToByte(message)));
+    }
+    
+    /** 
+     * returns the calculated bi from a given message
+     * @param message
+     * @return
+     */
+    public String getBi(String message) {
+    	byte[] m = digest.digest(files.Converter._stringToByte(message));
+    	return files.Converter._byteToHex(calculateExponentB(m));
+    }
 }

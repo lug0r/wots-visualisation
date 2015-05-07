@@ -39,6 +39,11 @@ public class View extends ViewPart {
 	private Button btnWots;
 	private Button btnWotsPlus;
 	private Text txt_Output;
+	private Text txt_Hash;
+	private Text txt_Bi;
+	private boolean details = false;
+	private Label lblMessageHash;
+	private Label lblBi;
 	
 	
 	/**
@@ -203,6 +208,9 @@ public class View extends ViewPart {
 					byte[] message = files.Converter._stringToByte(txt_message.getText());
 					txt_Sig.setText(files.Converter._byteToHex(instance.sign(message)));
 					
+					txt_Hash.setText(instance.getHash(txt_message.getText()));
+					txt_Bi.setText(instance.getBi(txt_message.getText()));
+					
 				} else if (!btnWots.getSelection() && btnWotsPlus.getSelection()) {
 					
 					// Set Image & Output field
@@ -229,6 +237,10 @@ public class View extends ViewPart {
 				
 					byte[] message = files.Converter._stringToByte(txt_message.getText());
 					txt_Sig.setText(files.Converter._byteToHex(instance.sign(message)));
+					
+					txt_Hash.setText(instance.getHash(txt_message.getText()));
+					txt_Bi.setText(instance.getBi(txt_message.getText()));
+					
 				} else {
 					
 					// TODO ERROR MESSAGE
@@ -274,6 +286,10 @@ public class View extends ViewPart {
 					} else {
 						txt_true_false.setText("Signature rejected");
 					}
+					
+					txt_Hash.setText(instance.getHash(txt_message.getText()));
+					txt_Bi.setText(instance.getBi(txt_message.getText()));
+					
 				} else if (!btnWots.getSelection() && btnWotsPlus.getSelection()) {
 					
 					// Set Image & Output field
@@ -305,6 +321,8 @@ public class View extends ViewPart {
 						txt_true_false.setText("Signature rejected");
 					}
 					
+					txt_Hash.setText(instance.getHash(txt_message.getText()));
+					txt_Bi.setText(instance.getBi(txt_message.getText()));
 					
 				} else {
 					
@@ -407,9 +425,11 @@ public class View extends ViewPart {
 				img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/Overview2.PNG"));
 //				Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Overview2.PNG");
 //				img_right.setImage(img);
+				txt_Hash.setText("");
+				txt_Bi.setText("");
 			}
 		});
-		btn_reset.setBounds(412, 615, 75, 25);
+		btn_reset.setBounds(520, 615, 75, 25);
 		btn_reset.setText("Reset");
 		
 		txt_true_false = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.CENTER);
@@ -436,6 +456,90 @@ public class View extends ViewPart {
 		txt_Output.setEditable(false);
 		txt_Output.setBounds(723, 58, 483, 191);
 		txt_Output.setText("This is the welcome message of our plugin, please insert something which makes more sense!");
+		
+		Button btn_Details = new Button(parent, SWT.NONE);
+		btn_Details.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				if (!details) {
+					
+					// Sets the View to a more detailed Version
+					
+					details = true;
+					
+					txt_Hash.setEnabled(true);
+					txt_Hash.setVisible(true);
+					
+					lblMessageHash.setEnabled(true);
+					lblMessageHash.setVisible(true);
+					
+					txt_Bi.setEnabled(true);
+					txt_Bi.setVisible(true);
+					
+					lblBi.setEnabled(true);
+					lblBi.setVisible(true);
+					
+					// Compress txt_fields to fit detailed view
+					
+					txt_message.setBounds(9, 58, 337, 96);
+					txt_Sigkey.setBounds(10, 283, 336, 75);
+					txt_Verifkey.setBounds(352, 283, 336, 75);
+					
+				} else if (details) {
+					
+					// Hides the details shown before
+					
+					details = false;
+					
+					txt_Hash.setEnabled(false);
+					txt_Hash.setVisible(false);
+					
+					lblMessageHash.setEnabled(false);
+					lblMessageHash.setVisible(false);
+					
+					txt_Bi.setEnabled(false);
+					txt_Bi.setVisible(false);
+					
+					lblBi.setEnabled(false);
+					lblBi.setVisible(false);
+					
+					// Set sizes back to original
+					
+					txt_message.setBounds(9, 58, 679, 96);
+					txt_Sigkey.setBounds(10, 283, 336, 151);
+					txt_Verifkey.setBounds(352, 283, 336, 151);
+					
+				
+				} else {
+					// TODO error message
+				}		
+			}
+		});
+		btn_Details.setBounds(412, 615, 102, 25);
+		btn_Details.setText("Toggle Details");
+		
+		txt_Hash = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
+		txt_Hash.setBounds(352, 58, 336, 96);
+		txt_Hash.setEnabled(false);
+		txt_Hash.setVisible(false);
+		
+		lblMessageHash = new Label(parent, SWT.NONE);
+		lblMessageHash.setBounds(354, 37, 109, 20);
+		lblMessageHash.setText("Message Hash");
+		lblMessageHash.setEnabled(false);
+		lblMessageHash.setVisible(false);
+		
+		txt_Bi = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
+		txt_Bi.setBounds(10, 415, 678, 56);
+		txt_Bi.setEnabled(false);
+		txt_Bi.setVisible(false);
+		
+		lblBi = new Label(parent, SWT.NONE);
+		lblBi.setBounds(10, 389, 70, 20);
+		lblBi.setText("Bi");
+		lblBi.setEnabled(false);
+		lblBi.setVisible(false);
 
 		
 	}
