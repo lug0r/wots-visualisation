@@ -8,6 +8,7 @@ import files.MathUtils;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -35,8 +36,10 @@ public class WOTSPlus {
     private byte[][] publicKey;
     // Message digest
     private MessageDigest digest;
-    //private byte[][] signature;
-    //private byte[][] r;
+    private byte[] signature;
+    private byte[] messageHash;
+    private byte[] b;
+    private byte[] seed;
 
     /**
      * Creates a new Winternitz OTS.
@@ -44,7 +47,13 @@ public class WOTSPlus {
      * @param w Winternitz parameter w
      */
     public WOTSPlus(int w) {
-	this.w = w;
+	
+    SecureRandom sRandom = new SecureRandom();
+    seed = new byte[16];
+    sRandom.nextBytes(seed);
+    prf = new files.AESPRF.AES128();	
+    	
+    this.w = w;
 	this.n = 32; // TODO For SHA256, should be dynamic
 
 	try {
@@ -55,15 +64,6 @@ public class WOTSPlus {
 	}
 
 	calculateLengths();
-    }
-
-    /**
-     * Initialize the Winternitz OTS.
-     *
-     * @param prf Pseudorandom function
-     */
-    public void init(PseudorandomFunction prf) {
-	this.prf = prf;
     }
 
     /**
@@ -82,9 +82,9 @@ public class WOTSPlus {
      *
      * @param seed Seed
      */
-    public void generateKeyPair(byte[] seed) {
-	generatePrivateKey(seed);
-	generatePublicKey(seed);
+    public void generateKeyPair() {
+	generatePrivateKey();
+	generatePublicKey();
     }
 
     /**
@@ -92,7 +92,7 @@ public class WOTSPlus {
      *
      * @param seed Seed
      */
-    public void generatePrivateKey(byte[] seed) {
+    public void generatePrivateKey() {
 	privateKey = new byte[l][n];
 
 	for (int i = 0; i < l; i++) {
@@ -101,25 +101,14 @@ public class WOTSPlus {
 	    System.arraycopy(input, 0, key, key.length - input.length, input.length);
 	    privateKey[i] = prf.apply(key, seed);
 	}
-	
-	
-
-	//logger.debug("Generate private key");
-	//logger.trace("SK: {} ...", ByteUtils.toHexString(ByteUtils.convert(privateKey), 10));
-	//logger.trace("Seed: {} ...", ByteUtils.toHexString(seed, 10));
-	//logger.trace("Private key: {} ({} bytes)", new Object[]{ByteUtils.toHexString(privateKey),});
     }
 
     /**
      * Generates the public key.
      *
      */
-    public void generatePublicKey(byte[] seed) {
+    public void generatePublicKey() {
 	publicKey = new byte[l+w-1][n];
-	
-	// Generate r and apply to public Key
-	
-	//r = new byte[w-1][n];
 	
 	for (int i = 0; i < w-1; i++) {
 	    byte[] key = new byte[n];
@@ -151,14 +140,9 @@ public class WOTSPlus {
      * @param message Message
      * @return Signature of the message
      */
-    public byte[] sign(byte[] message, byte[] b) {
+    public void sign() {
+    	
 	byte[][] tmpSignature = new byte[l][n];
-	
-	// Hash message
-	// message = digest.digest(message);
-	
-	// Calculate exponent b
-	// byte[] b = calculateExponentB(message);
 
 	// Hash each part bi times
 	for (int i = 0; i < l; i++) {
@@ -174,7 +158,7 @@ public class WOTSPlus {
 			}
 	}
 	
-	return files.Converter._hexStringToByte(files.Converter._2dByteToHex(tmpSignature));
+	signature = files.Converter._hexStringToByte(files.Converter._2dByteToHex(tmpSignature));
     }
 
     /**
@@ -184,14 +168,7 @@ public class WOTSPlus {
      * @param signature Signature
      * @return True if the signature is valid, otherwise false
      */
-    public boolean verify(byte[] message, byte[] signature, byte[] b) {
-	
-    // Hash message
-	// message = digest.digest(message);
-	
-	
-	// Calculate exponent b
-	// byte[] b = calculateExponentB(message);
+    public boolean verify() {
 	
 	byte[][] tmpSignature = files.Converter._hexStringTo2dByte((files.Converter._byteToHex(signature)), l);
 	
@@ -237,9 +214,9 @@ public class WOTSPlus {
      * @param message Message
      * @return Exponent b
      */
-    private byte[] calculateExponentB(byte[] message) {
+    private void calculateExponentB() {
 	// Convert message to base w representation
-	byte[] mBaseW = convertToBaseW(message, l1);
+	byte[] mBaseW = convertToBaseW(messageHash, l1);
 
 	// Calculate checksum c
 	BigInteger checksum = BigInteger.ZERO;
@@ -253,7 +230,7 @@ public class WOTSPlus {
 	// Concatenate message and checksum
 	byte[] b = ByteUtils.concatenate(mBaseW, checksumBaseW);
 
-	return b;
+	this.b = b;
     }
 
     /**
@@ -318,6 +295,10 @@ public class WOTSPlus {
 	return m;
     }
     
+    public byte[] getSignature() {
+    	return signature;
+    }
+    
     /**
      * Allows to set a custom Private Key
      * @param p
@@ -334,22 +315,45 @@ public class WOTSPlus {
     	this.publicKey = p;
     }
     
-    /**
-     * returns hash of given String
-     * @param message
-     * @return
-     */
-    public String getHash(String message) {
-    	return files.Converter._byteToHex(digest.digest(files.Converter._stringToByte(message)));
-    }
     
     /** 
      * returns the calculated bi from a given message
      * @param message
      * @return
      */
-    public String getBi(String message) {
-    	byte[] m = digest.digest(files.Converter._hexStringToByte(message));
-    	return files.Converter._byteToHex(calculateExponentB(m));
+    public byte[] getBi() {
+    	
+    	return b;
+    }
+    
+    public void setMessage(byte[] message) {
+    	this.messageHash = message;
+    }
+    
+    public void setBi(byte[] b) {
+    	this.b = b;
+    }
+    
+    public void setSignature(byte[] signature) {
+    	this.signature = signature;
+    }
+    
+    public void setW(int w) {
+    	this.w = w;
+    	calculateLengths();
+    }
+    
+    public byte[] getMessageHash() {
+    	return this.messageHash;
+    }
+    
+    public byte[] hashMessage(String message) {
+    	this.messageHash = digest.digest(files.Converter._stringToByte(message));
+    	return messageHash;
+    }
+    
+    public byte[] initB() {
+    	calculateExponentB();
+    	return b;
     }
 }

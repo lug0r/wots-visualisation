@@ -44,8 +44,17 @@ public class View extends ViewPart {
 	private boolean details = false;
 	private Label lblMessageHash;
 	private Label lblBi;
-	private Button btnHash;
-	private Button btn_CalcB;
+	
+	private wots.WinternitzOTS instance = new wots.WinternitzOTS(4);
+	private String privateKey = "";
+	private String publicKey = "";
+	private String signature = "";
+	private int w = 4;
+	private int n;
+	private int l;
+	private String message = "standard message";
+	private String messageHash = files.Converter._byteToHex(instance.hashMessage(message));
+	private String b = files.Converter._byteToHex(instance.initB());
 	
 	
 	/**
@@ -108,74 +117,26 @@ public class View extends ViewPart {
 				
 				if (btnWots.getSelection() && !btnWotsPlus.getSelection()) {
 					
-					// Set Image & Output field
-					
+					// Set Image & Output field for WOTS
 					txt_Output.setText("This message should explain the WOTS Key-Generation.");
-					
 					img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/Key_Generation.PNG"));
-//					Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Key_Generation.PNG");
-//					img_right.setImage(img);
-//				
-					// Make instance of WinternitzOTS with Winternitz-Paramenter w from Input-Field 
-					// and initializes it to make instance of a PRF to generate 
-				
-					byte[] seed;
-					int w = Integer.parseInt(txt_winternitzP.getText());
-					wots.WinternitzOTS instance = new wots.WinternitzOTS(w);
-					files.PseudorandomFunction prf = new files.AESPRF.AES128();
-					int n = prf.getLength();
-					SecureRandom sRandom = new SecureRandom();
-					seed = new byte[n];
-					sRandom.nextBytes(seed);
-					instance.init(prf);
-			    
-					// Generate Keys
-			    
-					instance.generatePrivateKey(seed);
-					instance.generatePublicKey();
-			    
-					// Put keys into Key-Fields
-					txt_Sigkey.setText(files.Converter._2dByteToHex(instance.getPrivateKey()));
-					txt_Verifkey.setText(files.Converter._2dByteToHex(instance.getPublicKey()));
-			    
 			    
 				} else if (!btnWots.getSelection() && btnWotsPlus.getSelection()) {
 					
-					// Set Image & Output field
-					
+					// Set Image & Output field for WOTS+
 					txt_Output.setText("This message should explain the WOTS+ Key-Generation.");
-					
 					img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/WOTSPlus.PNG"));
-//					Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Key_Generation.PNG");
-//					img_right.setImage(img);
-					
-					// Make instance of WinternitzOTS with Winternitz-Paramenter w from Input-Field 
-					// and initializes it to make instance of a PRF to generate 
-					
-					byte[] seed;
-					int w = Integer.parseInt(txt_winternitzP.getText());
-					wots.WOTSPlus instance = new wots.WOTSPlus(w);
-					files.PseudorandomFunction prf = new files.AESPRF.AES128();
-					int n = prf.getLength();
-				    SecureRandom sRandom = new SecureRandom();
-				    seed = new byte[n];
-				    sRandom.nextBytes(seed);
-				    instance.init(prf);
-					
-				    // Generate Keys
-				    
-				    instance.generatePrivateKey(seed);
-				    instance.generatePublicKey(seed);
-				    
-				    // Put keys into Key-Fields
-				    txt_Sigkey.setText(files.Converter._2dByteToHex(instance.getPrivateKey()));
-				    txt_Verifkey.setText(files.Converter._2dByteToHex(instance.getPublicKey()));
 					
 				} else {
 					
 					// TODO ERROR MESSAGE
 					
 				}
+				
+				// Generate Keys
+				setOutputs();
+				instance.generateKeyPair();
+				getOutputs();
 			}
 		});
 
@@ -191,75 +152,25 @@ public class View extends ViewPart {
 				
 				if (btnWots.getSelection() && !btnWotsPlus.getSelection()) {
 				
-					// Set Image & Output field
-					
+					// Set Image & Output field for WOTS
 					txt_Output.setText("This message should explain the WOTS Signature-Generation.");
-				
 					img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/Signature_Generation.PNG"));
-//					Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Signature_Generation.PNG");
-//					img_right.setImage(img);
-				
-					// Make instance of WinternitzOTS with Winternitz-Paramenter w from Input-Field
-				
-					int w = Integer.parseInt(txt_winternitzP.getText());
-					wots.WinternitzOTS instance = new wots.WinternitzOTS(w);
-				
-					// Set private key of the WOTS-Instance to the one given in the Key-Field
-					
-					byte[][] privateKey = files.Converter._hexStringTo2dByte(txt_Sigkey.getText(), instance.getLength());
-					instance.setPrivateKey(privateKey);
-					
-					// Hash message and set txt_Hash + Calculate bi and set txt_bi if necessary
-					if (!details) {
-						txt_Hash.setText(instance.getHash(txt_message.getText()));
-						txt_Bi.setText(instance.getBi(txt_Hash.getText()));
-					}
-					
-					// Sign message and put Signature in Output Field
-					byte[] message = files.Converter._hexStringToByte(txt_Hash.getText());
-					txt_Sig.setText(files.Converter._byteToHex(instance.sign(message, files.Converter._hexStringToByte(txt_Bi.getText()))));
-					
-					
 					
 				} else if (!btnWots.getSelection() && btnWotsPlus.getSelection()) {
 					
-					// Set Image & Output field
-					
+					// Set Image & Output field for WOTS+
 					txt_Output.setText("This message should explain the WOTS+ Key-Generation.");
-					
 					img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/WOTSPlus.PNG"));
-//					Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Signature_Generation.PNG");
-//					img_right.setImage(img);
-					
-					// Make instance of WinternitzOTS with Winternitz-Paramenter w from Input-Field
-					
-					int w = Integer.parseInt(txt_winternitzP.getText());
-					wots.WOTSPlus instance = new wots.WOTSPlus(w);
-				
-					// Set Keys of the WOTS+-Instance to the one given in the Key-Field
-					
-					byte[][] privateKey = files.Converter._hexStringTo2dByte(txt_Sigkey.getText(), instance.getLength());
-					instance.setPrivateKey(privateKey);
-					byte[][] publicKey = files.Converter._hexStringTo2dByte(txt_Verifkey.getText(), (instance.getLength() + w-1));
-					instance.setPublicKey(publicKey);
-					
-					// Hash message and set txt_Hash + Calculate bi and set txt_bi if necessary
-					if (!details) {
-						txt_Hash.setText(instance.getHash(txt_message.getText()));
-						txt_Bi.setText(instance.getBi(txt_Hash.getText()));
-					}
-					
-					// Sign message and put Signature in Output Field
-				
-					byte[] message = files.Converter._hexStringToByte(txt_Hash.getText());
-					txt_Sig.setText(files.Converter._byteToHex(instance.sign(message, files.Converter._hexStringToByte(txt_Bi.getText()))));
-					
 					
 				} else {
 					
 					// TODO ERROR MESSAGE
 				}
 				
+				// Sign message and put Signature in Output Field
+				setOutputs();
+				instance.sign();
+				getOutputs();
 			}
 		});
 		btnNewButton_1.setText("Generate signature");
@@ -274,77 +185,15 @@ public class View extends ViewPart {
 				
 				if (btnWots.getSelection() && !btnWotsPlus.getSelection()) {
 				
-					// Set Image & Output field 
-					
+					// Set Image & Output field for WOTS
 					txt_Output.setText("This message should explain the WOTS Signature-Verification.");
-				
 					img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/Signature_Verification.PNG"));
-//					Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Signature_Verification.PNG");
-//					img_right.setImage(img);
-				
-					// Make instance of WinternitzOTS with Winternitz-Paramenter w from Input-Field
-				
-					int w = Integer.parseInt(txt_winternitzP.getText());
-					wots.WinternitzOTS instance = new wots.WinternitzOTS(w);
-				
-					// Set public key of the WOTS-Instance to the one given in the Key-Field
-				
-					byte[][] publicKey = files.Converter._hexStringTo2dByte(txt_Verifkey.getText(), instance.getLength());
-					instance.setPublicKey(publicKey);
-					
-					// Hash message and set txt_Hash + Calculate bi and set txt_bi if necessary
-					if (!details) {
-						txt_Hash.setText(instance.getHash(txt_message.getText()));
-						txt_Bi.setText(instance.getBi(txt_Hash.getText()));
-					}
-				
-					// Get message and signature from Input-fields and set result of Verification to Output field
-				
-					byte[] message = files.Converter._hexStringToByte(txt_Hash.getText());
-					byte[] signature = files.Converter._hexStringToByte(txt_Sig.getText());
-				
-					if (instance.verify(message, signature, files.Converter._hexStringToByte(txt_Bi.getText()))) {
-						txt_true_false.setText("Signature valid");
-					} else {
-						txt_true_false.setText("Signature rejected");
-					}
 					
 				} else if (!btnWots.getSelection() && btnWotsPlus.getSelection()) {
 					
-					// Set Image & Output field
-					
+					// Set Image & Output field for WOTS+
 					txt_Output.setText("This message should explain the WOTS+ Signature-Verification.");
-					
 					img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/WOTSPlus.PNG"));
-//					Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Signature_Verification.PNG");
-//					img_right.setImage(img);
-					
-					// Make instance of WinternitzOTS with Winternitz-Paramenter w from Input-Field
-					
-					int w = Integer.parseInt(txt_winternitzP.getText());
-					wots.WOTSPlus instance = new wots.WOTSPlus(w);
-					
-					// Set public key of the WOTS-Instance to the one given in the Key-Field
-					
-					byte[][] publicKey = files.Converter._hexStringTo2dByte(txt_Verifkey.getText(), (instance.getLength() + w-1));
-					instance.setPublicKey(publicKey);
-					
-					// Hash message and set txt_Hash + Calculate bi and set txt_bi if necessary
-					if (!details) {
-						txt_Hash.setText(instance.getHash(txt_message.getText()));
-						txt_Bi.setText(instance.getBi(txt_Hash.getText()));
-					}
-					
-					// Get message and signature from Input-fields and set result of Verification to Output field
-					
-					byte[] message = files.Converter._hexStringToByte(txt_Hash.getText());
-					byte[] signature = files.Converter._hexStringToByte(txt_Sig.getText());
-				
-					if (instance.verify(message, signature, files.Converter._hexStringToByte(txt_Bi.getText()))) {
-						txt_true_false.setText("Signature valid");
-					} else {
-						txt_true_false.setText("Signature rejected");
-					}
 					
 				} else {
 					
@@ -352,6 +201,12 @@ public class View extends ViewPart {
 					
 				}
 				
+				// Verify Signature
+				if (instance.verify()) {
+					txt_true_false.setText("Signature valid");
+				} else {
+					txt_true_false.setText("Signature rejected");
+				}
 			}
 		});
 		btn_VerifySig.setBounds(284, 615, 122, 25);
@@ -506,12 +361,6 @@ public class View extends ViewPart {
 					lblBi.setEnabled(true);
 					lblBi.setVisible(true);
 					
-					btnHash.setEnabled(true);
-					btnHash.setVisible(true);
-					
-					btn_CalcB.setEnabled(true);
-					btn_CalcB.setVisible(true);
-					
 					// Compress txt_fields to fit detailed view
 					
 					txt_message.setBounds(9, 58, 337, 96);
@@ -539,12 +388,6 @@ public class View extends ViewPart {
 					
 					lblBi.setEnabled(false);
 					lblBi.setVisible(false);
-					
-					btnHash.setEnabled(false);
-					btnHash.setVisible(false);
-					
-					btn_CalcB.setEnabled(false);
-					btn_CalcB.setVisible(false);
 					
 					// Set sizes back to original
 					
@@ -583,43 +426,6 @@ public class View extends ViewPart {
 		lblBi.setEnabled(false);
 		lblBi.setVisible(false);
 		
-		btnHash = new Button(parent, SWT.NONE);
-		btnHash.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				
-				// Make instance of WinternitzOTS with Winternitz-Paramenter w from Input-Field
-				
-				int w = Integer.parseInt(txt_winternitzP.getText());
-				wots.WOTSPlus instance = new wots.WOTSPlus(w);
-				
-				// Hash message and set txt_Hash
-				txt_Hash.setText(instance.getHash(txt_message.getText()));
-			}
-		});
-		btnHash.setBounds(193, 160, 116, 25);
-		btnHash.setText("Hash Message");
-		btnHash.setEnabled(false);
-		btnHash.setVisible(false);
-		
-		btn_CalcB = new Button(parent, SWT.NONE);
-		btn_CalcB.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				
-				// Make instance of WinternitzOTS with Winternitz-Paramenter w from Input-Field
-				
-				int w = Integer.parseInt(txt_winternitzP.getText());
-				wots.WOTSPlus instance = new wots.WOTSPlus(w);
-				
-				// Calculate Bi's and set txt_Bi
-				txt_Bi.setText(instance.getBi((txt_Hash.getText())));
-			}
-		});
-		btn_CalcB.setBounds(316, 160, 111, 25);
-		btn_CalcB.setText("Calculate Bi's");
-		btn_CalcB.setEnabled(false);
-		btn_CalcB.setVisible(false);
 
 		
 	}
@@ -629,6 +435,30 @@ public class View extends ViewPart {
 	 */
 	public void setFocus() {
 		//viewer.getControl().setFocus();
+	}
+	
+	public void setOutputs() {
+		
+		instance.setW(w);
+		instance.setPrivateKey(files.Converter._hexStringTo2dByte(privateKey, instance.getLength()));
+		instance.setPublicKey(files.Converter._hexStringTo2dByte(publicKey, instance.getLength()));
+		instance.setSignature(files.Converter._hexStringToByte(signature));
+		instance.setMessage(files.Converter._hexStringToByte(messageHash));
+		instance.setBi(files.Converter._hexStringToByte(b));
+	}
+	
+	public void getOutputs() {
+		this.privateKey = files.Converter._2dByteToHex(instance.getPrivateKey());
+		this.publicKey = files.Converter._2dByteToHex(instance.getPublicKey());
+		this.signature = files.Converter._byteToHex(instance.getSignature());
+		this.messageHash = files.Converter._byteToHex(instance.getMessageHash());
+		this.b = files.Converter._byteToHex(instance.getBi());
+		
+		txt_Sigkey.setText(privateKey);
+		txt_Verifkey.setText(publicKey);
+		txt_Bi.setText(b);
+		txt_Sig.setText(signature);
+		txt_Hash.setText(messageHash);
 	}
 }
 
