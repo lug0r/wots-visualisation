@@ -24,48 +24,64 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.wb.swt.ResourceManager;
 
+/**
+ * @author Hannes Sochor <sochorhannes@gmail.com>
+ * @author Klaus Schönberger <TODO edit email>
+ * @author Raphael Luger <TODO edit email>
+ */
 public class View extends ViewPart {
 	public View() {
 		setPartName("WOTS-Visualisierung");
 	}
 	public static final String ID = "asdf.view";
 	
-	
-	public Text txt_message;
+	// Text-Fields for message 
+	private Text txt_message;
 	private Text txt_MessageSize;
-	
+	// Text-Fields for Private Key
 	private Text txt_Sigkey;
 	private Text txt_SigKeySize;
-	
+	// Text-Fields for Public Key
 	private Text txt_Verifkey;
 	private Text txt_VerKeySize;
-	
+	// Text-Fields for Hash
 	private Text txt_Hash;
 	private Text txt_HashSize;
-	
+	// Text-Fields for Signature
 	private Text txt_Sig;
 	private Text txt_SignatureSize;
-	
+	// Text-Fields for Bitstring bi
 	private Text txt_Bi;
 	private Text txt_BSize;
-	
+	// Text-Field for Winternitz Parameter p
 	private Text txt_winternitzP;
-	
+	// Text-Field for Output if Signature is valid or not
 	private Text txt_true_false;
-	
+	// Buttons to switch between WOTS and WOTS+
 	private Button btnWots;
 	private Button btnWotsPlus;
-	
+	// Labels for txt-fields
 	private Label lblMessageHash;
 	private Label lblBi;
 	private Label lblSignature;
-	
+	private Label lblWotsVisualization;
+	private Label lblMessage;
+	private Label lblWinternitzParameterw;
+	private Label lblHashFunction;
+	private Label lblSignatureKey;
+	private Label lblVerificationKey;
+	// Buttons to generate Keys, Signature, Verification, loading Files, reset and toggle Details
 	private Button btn_Genkey;
 	private Button btn_VerifySig;
 	private Button btn_Sign;
-	
+	private Button btnLoadMessageFrom;
+	private Button btn_reset;
+	private Button btn_Details;
+	// Output fields for rigth side
 	private Label img_right;
 	private Text txt_Output;
+	// Dropdown List to choose Hash-Algorithm
+	private Combo cmb_Hash;
 	
 	// Parameter for WOTS/WOTS+
 	private wots.OTS instance = new wots.WinternitzOTS(4);
@@ -75,11 +91,14 @@ public class View extends ViewPart {
 	private int w = 4;
 	private int n = instance.getN();
 	private int l = instance.getL();
-	private String message = "";
+	private String message = "standard message";
 	private String messageHash = files.Converter._byteToHex(instance.hashMessage(message));
 	private String b = files.Converter._byteToHex(instance.initB());
 	private boolean details = false;
-	private boolean init = false;
+	private boolean disable = true;
+	private int ctr;
+	private Text[] txtToEnableOrDisable;
+	private Button[] btnToEnableOrDisable; 
 	
 	/**
 	 * @wbp.nonvisual location=214,209
@@ -132,12 +151,146 @@ public class View extends ViewPart {
 		parent.setToolTipText("");
 		parent.setLayout(null);
 		
+		// Initialize Objects
 		btn_Genkey = new Button(parent, SWT.NONE);
+		btn_Sign = new Button(parent, SWT.NONE);
+		btn_VerifySig = new Button(parent, SWT.NONE);
+		btnLoadMessageFrom = new Button(parent, SWT.NONE);
+		btn_reset = new Button(parent, SWT.NONE);
+		btnWots = new Button(parent, SWT.RADIO);
+		btnWotsPlus = new Button(parent, SWT.RADIO);
+		btn_Details = new Button(parent, SWT.NONE);
+
+		lblWotsVisualization = new Label(parent, SWT.NONE);
+		lblMessage = new Label(parent, SWT.NONE);
+		lblWinternitzParameterw = new Label(parent, SWT.NONE);
+		lblHashFunction = new Label(parent, SWT.NONE);
+		lblSignatureKey = new Label(parent, SWT.NONE);
+		lblVerificationKey = new Label(parent, SWT.NONE);
+		lblSignature = new Label(parent, SWT.NONE);
+		lblMessageHash = new Label(parent, SWT.NONE);
+		lblBi = new Label(parent, SWT.NONE);
+		
+		txt_message = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
+		txt_winternitzP = new Text(parent, SWT.BORDER);
+		txt_Sigkey = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
+		txt_Verifkey = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
+		txt_Sig = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
+		txt_true_false = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.CENTER);
+		txt_Output = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.MULTI);
+		txt_Hash = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
+		txt_Bi = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
+		txt_MessageSize = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
+		txt_SigKeySize = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
+		txt_VerKeySize = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
+		txt_HashSize = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
+		txt_SignatureSize = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
+		txt_BSize = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
+		
+		cmb_Hash = new Combo(parent, SWT.NONE);
+		img_right = new Label(parent, 0);
+
+		// Set Bounds for Objects
+		btn_Genkey.setBounds(10, 674, 116, 25);
+		btn_Sign.setBounds(132, 674, 146, 25);
+		btn_VerifySig.setBounds(284, 674, 122, 25);
+		btnLoadMessageFrom.setBounds(10, 160, 177, 25);
+		btn_reset.setBounds(520, 674, 75, 25);
+		btnWots.setBounds(352, 186, 111, 20);
+		btnWotsPlus.setBounds(352, 217, 111, 20);
+		btn_Details.setBounds(412, 674, 102, 25);
+
+		lblWotsVisualization.setBounds(10, 10, 140, 21);
+		lblMessage.setBounds(10, 37, 86, 21);
+		lblWinternitzParameterw.setBounds(10, 200, 140, 21);
+		lblHashFunction.setBounds(10, 224, 96, 25);
+		lblSignatureKey.setBounds(10, 262, 93, 20);
+		lblVerificationKey.setBounds(352, 262, 111, 20);
+		lblSignature.setBounds(10, 463, 75, 21);
+		lblMessageHash.setBounds(354, 37, 109, 20);
+		lblBi.setBounds(10, 389, 70, 20);
+
+		txt_message.setBounds(9, 58, 679, 96);
+		txt_winternitzP.setBounds(156, 197, 31, 21);
+		txt_Sigkey.setBounds(10, 283, 336, 151);
+		txt_Verifkey.setBounds(352, 283, 336, 151);
+		txt_Sig.setBounds(10, 490, 570, 107);
+		txt_true_false.setBounds(586, 490, 102, 107);
+		txt_Output.setBounds(723, 58, 483, 282);
+		txt_Hash.setBounds(352, 58, 336, 96);
+		txt_Bi.setBounds(10, 415, 678, 56);
+		txt_MessageSize.setBounds(610, 159, 78, 26);
+		txt_SigKeySize.setBounds(238, 440, 108, 26);
+		txt_VerKeySize.setBounds(580, 440, 108, 26);
+		txt_HashSize.setBounds(610, 159, 78, 26);
+		txt_SignatureSize.setBounds(472, 603, 108, 26);
+		txt_BSize.setBounds(610, 477, 78, 26);
+		
+		img_right.setBounds(723, 346, 483, 322);
+		cmb_Hash.setBounds(112, 221, 75, 23);
+
+		// Set Attributes for Objects
+		btn_Genkey.setText("Generate keys");
+		btn_Sign.setText("Generate signature");
+		btn_VerifySig.setText("Verify signature");
+		btnLoadMessageFrom.setText("Load message from file");
+		btn_reset.setText("Reset");
+		btnWots.setText("WOTS");
+		btnWots.setSelection(true);
+		btnWotsPlus.setText("WOTS+");
+		btn_Details.setText("Toggle Details");
+
+		lblWotsVisualization.setText("WOTS Visualization");
+		lblMessage.setText("Message");
+		lblWinternitzParameterw.setText("Winternitz Parameter (w)");
+		lblHashFunction.setText("Hash function");
+		lblSignatureKey.setText("Signature key");
+		lblVerificationKey.setText("Verification key");
+		lblSignature.setText("Signature");
+		lblMessageHash.setText("Message Hash");
+		lblMessageHash.setEnabled(false);
+		lblMessageHash.setVisible(false);
+		lblBi.setText("Bi");
+		lblBi.setEnabled(false);
+		lblBi.setVisible(false);
+		
+		txt_winternitzP.setText("4");
+		txt_Sigkey.setText("");
+		txt_true_false.setEditable(false);
+		txt_message.setText("standard message");
+		txt_Output.setEditable(false);
+		txt_Output.setText("This is the welcome message of our plugin, please insert something which makes more sense!");
+		txt_Hash.setEnabled(false);
+		txt_Hash.setVisible(false);
+		txt_Hash.setText(messageHash);
+		txt_Bi.setEnabled(false);
+		txt_Bi.setVisible(false);
+		txt_Bi.setText(b);
+		txt_MessageSize.setText(Integer.toString(files.Converter._stringToByte(message).length) + " Bytes");
+		txt_SigKeySize.setText(Integer.toString(files.Converter._stringToByte(privateKey).length/2) + "/" + (n*l) + " B");
+		txt_VerKeySize.setText(Integer.toString(files.Converter._stringToByte(publicKey).length/2) + "/" + (n*instance.getPublicKeyLength()) + " B");
+		txt_HashSize.setText(Integer.toString(files.Converter._hexStringToByte(messageHash).length) + "/" + n + " B");
+		txt_HashSize.setEnabled(false);
+		txt_HashSize.setVisible(false);
+		txt_SignatureSize.setText(Integer.toString(files.Converter._stringToByte(signature).length/2) + "/" + (n*l) + " B");
+		txt_BSize.setText(Integer.toString(files.Converter._hexStringToByte(b).length) + "/" + l + " B");
+		txt_BSize.setEnabled(false);
+		txt_BSize.setVisible(false);
+		
+		cmb_Hash.setText("SHA-256");
+		img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/Overview2.PNG"));
+
+		// ########################################
+		// ## ADD SELECTION LISTENER FOR BUTTONS ##
+		// ########################################
+		
 		btn_Genkey.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
 				// KEY GENERATION
+				
+				disable = false;
 				
 				if (btnWots.getSelection() && !btnWotsPlus.getSelection()) {
 					
@@ -161,18 +314,18 @@ public class View extends ViewPart {
 				setOutputs();
 				instance.generateKeyPair();
 				getOutputs();
+				
+				disable = true;
 			}
 		});
 
-		btn_Genkey.setBounds(10, 674, 116, 25);
-		btn_Genkey.setText("Generate keys");
-		
-		btn_Sign = new Button(parent, SWT.NONE);
 		btn_Sign.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
 				// SIGNATURE GENERATION
+				
+				disable = false;
 				
 				if (btnWots.getSelection() && !btnWotsPlus.getSelection()) {
 				
@@ -195,17 +348,18 @@ public class View extends ViewPart {
 				setOutputs();
 				instance.sign();
 				getOutputs();
+				
+				disable = true;
 			}
 		});
-		btn_Sign.setText("Generate signature");
-		btn_Sign.setBounds(132, 674, 146, 25);
 		
-		btn_VerifySig = new Button(parent, SWT.NONE);
 		btn_VerifySig.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
 				// SIGNATURE VERIFICATION
+				
+				disable = false;
 				
 				if (btnWots.getSelection() && !btnWotsPlus.getSelection()) {
 				
@@ -226,50 +380,23 @@ public class View extends ViewPart {
 				}
 				
 				// Verify Signature
+				setOutputs();
 				if (instance.verify()) {
 					txt_true_false.setText("Signature valid");
 				} else {
 					txt_true_false.setText("Signature rejected");
 				}
-			}
-		});
-		btn_VerifySig.setBounds(284, 674, 122, 25);
-		btn_VerifySig.setText("Verify signature");
-		
-		Label lblWotsVisualization = new Label(parent, SWT.NONE);
-		lblWotsVisualization.setBounds(10, 10, 140, 21);
-		lblWotsVisualization.setText("WOTS Visualization");
-		
-		Label lblMessage = new Label(parent, SWT.NONE);
-		lblMessage.setBounds(10, 37, 86, 21);
-		lblMessage.setText("Message");
-		
-		txt_message = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
-		txt_message.setBounds(9, 58, 679, 96);
-		txt_message.addModifyListener(new ModifyListener() {
-			
-			@Override
-			public void modifyText(ModifyEvent e) {
-				
-				message = txt_message.getText();
-				messageHash = files.Converter._byteToHex(instance.hashMessage(message));
-				b = files.Converter._byteToHex(instance.initB());
-				
-				if (init) {
-					txt_Hash.setText(messageHash);
-					txt_Bi.setText(b);
-					txt_MessageSize.setText(Integer.toString(files.Converter._stringToByte(message).length) + " Bytes");
-				}
+				getOutputs();
+				disable = true;
 			}
 		});
 		
-		Button btnLoadMessageFrom = new Button(parent, SWT.NONE);
 		btnLoadMessageFrom.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
+				
+				// Loads message from file
 				JFileChooser chooser = new JFileChooser();
-			    //FileNameExtensionFilter filter = new FileNameExtensionFilter(
-			    //    "JPG & GIF Images", "jpg", "gif");
-			    //chooser.setFileFilter(filter);
 			    int returnVal = chooser.showOpenDialog(null);
 			    if(returnVal == JFileChooser.APPROVE_OPTION) {
 			       System.out.println("You chose to open this file: " +
@@ -284,120 +411,16 @@ public class View extends ViewPart {
 						e1.printStackTrace();
 					}
 			    }
-			}
-		});
-		btnLoadMessageFrom.setBounds(10, 160, 177, 25);
-		btnLoadMessageFrom.setText("Load message from file");
-		
-		Label lblWinternitzParameterw = new Label(parent, SWT.NONE);
-		lblWinternitzParameterw.setBounds(10, 200, 140, 21);
-		lblWinternitzParameterw.setText("Winternitz Parameter (w)");
-		
-		txt_winternitzP = new Text(parent, SWT.BORDER);
-		txt_winternitzP.setText("4");
-		txt_winternitzP.setBounds(156, 197, 31, 21);
-		txt_winternitzP.addModifyListener(new ModifyListener() {
-			
-			@Override
-			public void modifyText(ModifyEvent e) {
-				
-				w = Integer.parseInt(txt_winternitzP.getText());
-				instance.setW(w);
+			    
+			    setEnabled();
 			}
 		});
 		
-		Label lblHashFunction = new Label(parent, SWT.NONE);
-		lblHashFunction.setBounds(10, 224, 96, 25);
-		lblHashFunction.setText("Hash function");
-		
-		Combo cmb_Hash = new Combo(parent, SWT.NONE);
-		cmb_Hash.setBounds(112, 221, 75, 23);
-		cmb_Hash.setText("SHA-256");
-		
-		Label lblSignatureKey = new Label(parent, SWT.NONE);
-		lblSignatureKey.setBounds(10, 262, 93, 20);
-		lblSignatureKey.setText("Signature key");
-		
-		Label lblVerificationKey = new Label(parent, SWT.NONE);
-		lblVerificationKey.setBounds(352, 262, 111, 20);
-		lblVerificationKey.setText("Verification key");
-		
-		txt_Sigkey = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
-		txt_Sigkey.setText("");
-		txt_Sigkey.setBounds(10, 283, 336, 151);
-		txt_Sigkey.addModifyListener(new ModifyListener() {
-			
-			@Override
-			public void modifyText(ModifyEvent e) {
-				
-				privateKey = txt_Sigkey.getText();
-				txt_SigKeySize.setText(Integer.toString(files.Converter._stringToByte(privateKey).length/2) + "/" + (n*l) + "B");
-			
-				if (files.Converter._stringToByte(privateKey).length/2 != n*l) {
-					btn_Genkey.setEnabled(false);
-					btn_Sign.setEnabled(false);
-					btn_VerifySig.setEnabled(false);
-				} else {
-					btn_Genkey.setEnabled(true);
-					btn_Sign.setEnabled(true);
-					btn_VerifySig.setEnabled(true);
-				}
-			}
-		});
-		
-		txt_Verifkey = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
-		txt_Verifkey.setBounds(352, 283, 336, 151);
-		txt_Verifkey.addModifyListener(new ModifyListener() {
-			
-			@Override
-			public void modifyText(ModifyEvent e) {
-				
-				publicKey = txt_Verifkey.getText();
-				txt_VerKeySize.setText(Integer.toString(files.Converter._stringToByte(publicKey).length/2) + "/" + (n*instance.getPublicKeyLength()) + "B");
-			
-				if (files.Converter._stringToByte(publicKey).length/2 != (n*instance.getPublicKeyLength())) {
-					btn_Genkey.setEnabled(false);
-					btn_Sign.setEnabled(false);
-					btn_VerifySig.setEnabled(false);
-				} else {
-					btn_Genkey.setEnabled(true);
-					btn_Sign.setEnabled(true);
-					btn_VerifySig.setEnabled(true);
-				}
-			}
-		});
-		
-		lblSignature = new Label(parent, SWT.NONE);
-		lblSignature.setBounds(10, 463, 75, 21);
-		lblSignature.setText("Signature");
-		
-		txt_Sig = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
-		txt_Sig.setBounds(10, 490, 570, 107);
-		txt_Sig.addModifyListener(new ModifyListener() {
-			
-			@Override
-			public void modifyText(ModifyEvent e) {
-				
-				signature = txt_Sig.getText();
-				txt_SignatureSize.setText(Integer.toString(files.Converter._stringToByte(signature).length/2) + "/" + (n*l) + "B");
-			
-				if (files.Converter._stringToByte(signature).length/2 != n*l) {
-					btn_Genkey.setEnabled(false);
-					btn_Sign.setEnabled(false);
-					btn_VerifySig.setEnabled(false);
-				} else {
-					btn_Genkey.setEnabled(true);
-					btn_Sign.setEnabled(true);
-					btn_VerifySig.setEnabled(true);
-				}
-			}
-		});
-		
-		Button btn_reset = new Button(parent, SWT.NONE);
 		btn_reset.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
+				// resets everything
 				instance = new wots.WinternitzOTS(4);
 				privateKey = "";
 				publicKey = "";
@@ -420,28 +443,21 @@ public class View extends ViewPart {
 				
 				btnWots.setSelection(true);
 				btnWotsPlus.setSelection(false);
+				
+				// reset key lengths
+				
+				txt_SigKeySize.setText("0/" + (n*l) + " B");
+				txt_VerKeySize.setText("0/" + (n*instance.getPublicKeyLength()) + " B");
+				
+				setEnabled();
 			}
 		});
-		btn_reset.setBounds(520, 674, 75, 25);
-		btn_reset.setText("Reset");
 		
-		txt_true_false = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.CENTER);
-		txt_true_false.setEditable(false);
-		txt_true_false.setBounds(586, 490, 102, 107);
-		txt_message.setText("standard message");
-		img_right = new Label(parent, 0);
-		img_right.setBounds(723, 346, 483, 322);
-		img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/Overview2.PNG"));
-		
-		btnWots = new Button(parent, SWT.RADIO);
-		btnWots.setBounds(352, 186, 111, 20);
-		btnWots.setText("WOTS");
-		btnWots.setSelection(true);
 		btnWots.addSelectionListener( new SelectionListener() {
-			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
+				// Changes type to WOTS and resets what is necessary to do so
 				instance = new wots.WinternitzOTS(w);
 				privateKey = "";
 				publicKey = "";
@@ -449,6 +465,8 @@ public class View extends ViewPart {
 				txt_Sigkey.setText("");
 				txt_Verifkey.setText("");
 				txt_Sig.setText("");
+				
+				setEnabled();
 			}
 			
 			@Override
@@ -456,14 +474,11 @@ public class View extends ViewPart {
 			}
 		});
 		
-		btnWotsPlus = new Button(parent, SWT.RADIO);
-		btnWotsPlus.setBounds(352, 217, 111, 20);
-		btnWotsPlus.setText("WOTS+");
 		btnWotsPlus.addSelectionListener( new SelectionListener() {
-			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
+				// Changes type to WOTS+ and resets what is necessary to do so
 				instance = new wots.WOTSPlus(w);
 				privateKey = "";
 				publicKey = "";
@@ -471,6 +486,8 @@ public class View extends ViewPart {
 				txt_Sigkey.setText("");
 				txt_Verifkey.setText("");
 				txt_Sig.setText("");
+				
+				setEnabled();
 			}
 			
 			@Override
@@ -478,12 +495,6 @@ public class View extends ViewPart {
 			}
 		});
 		
-		txt_Output = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.MULTI);
-		txt_Output.setEditable(false);
-		txt_Output.setBounds(723, 58, 483, 282);
-		txt_Output.setText("This is the welcome message of our plugin, please insert something which makes more sense!");
-		
-		Button btn_Details = new Button(parent, SWT.NONE);
 		btn_Details.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -573,108 +584,156 @@ public class View extends ViewPart {
 				}		
 			}
 		});
-		btn_Details.setBounds(412, 674, 102, 25);
-		btn_Details.setText("Toggle Details");
 		
-		txt_Hash = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
-		txt_Hash.setBounds(352, 58, 336, 96);
-		txt_Hash.setEnabled(false);
-		txt_Hash.setVisible(false);
-		txt_Hash.setText(messageHash);
-		txt_Hash.addModifyListener(new ModifyListener() {
+		// #########################################
+		// ## ADD MODIFY LISTENER FOR TEXT-FIELDS ##
+		// #########################################
+		
+		txt_message.addModifyListener(new ModifyListener() {
 			
 			@Override
 			public void modifyText(ModifyEvent e) {
 				
-				messageHash = txt_Hash.getText();
-				instance.setMessage(files.Converter._hexStringToByte(messageHash));
+				// Changes hash and Bitstring bi if message is modified
+				disable = false;
+				message = txt_message.getText();
+				messageHash = files.Converter._byteToHex(instance.hashMessage(message));
 				b = files.Converter._byteToHex(instance.initB());
+				txt_Hash.setText(messageHash);
+				txt_Bi.setText(b);
+				txt_MessageSize.setText(Integer.toString(files.Converter._stringToByte(message).length) + " Bytes");
 				
-				if (init) {
-					txt_Bi.setText(b);
-					txt_HashSize.setText(Integer.toString(files.Converter._stringToByte(messageHash).length/2) + "/" + n + "B");
-				}
-				
-				if (files.Converter._stringToByte(messageHash).length/2 != n) {
-					btn_Genkey.setEnabled(false);
-					btn_Sign.setEnabled(false);
-					btn_VerifySig.setEnabled(false);
-				} else {
-					btn_Genkey.setEnabled(true);
-					btn_Sign.setEnabled(true);
-					btn_VerifySig.setEnabled(true);
-				}
+				disable = true;
 			}
 		});
 		
-		lblMessageHash = new Label(parent, SWT.NONE);
-		lblMessageHash.setBounds(354, 37, 109, 20);
-		lblMessageHash.setText("Message Hash");
-		lblMessageHash.setEnabled(false);
-		lblMessageHash.setVisible(false);
-		
-		txt_Bi = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
-		txt_Bi.setBounds(10, 415, 678, 56);
-		txt_Bi.setEnabled(false);
-		txt_Bi.setVisible(false);
-		txt_Bi.setText(b);
-		txt_Bi.addModifyListener(new ModifyListener() {
-			
+		txt_winternitzP.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				
-				b = txt_Bi.getText();
-				instance.setBi(files.Converter._hexStringToByte(b));
-				txt_BSize.setText(Integer.toString(files.Converter._stringToByte(b).length/2) + "/" + l + "B");
-			
-				if (files.Converter._stringToByte(b).length/2 != l) {
-					btn_Genkey.setEnabled(false);
-					btn_Sign.setEnabled(false);
-					btn_VerifySig.setEnabled(false);
+				// Changes Winternitz Parameter if modified
+				w = Integer.parseInt(txt_winternitzP.getText());
+				instance.setW(w);
+				
+				// TODO Should also change Sizes of keys when edited (Now they only change if one of the other btns is activated
+			}
+		});
+		
+		txt_Sigkey.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				
+				// Changes Private Key if modified
+				
+				ctr++;
+				
+				if (ctr%2 != 0 && disable) {
+					setDisabled(txt_Sigkey);
 				} else {
-					btn_Genkey.setEnabled(true);
-					btn_Sign.setEnabled(true);
-					btn_VerifySig.setEnabled(true);
+					privateKey = txt_Sigkey.getText();
+					txt_SigKeySize.setText(Integer.toString(files.Converter._stringToByte(privateKey).length/2) + "/" + (n*l) + " B");
+			
+					if (files.Converter._stringToByte(privateKey).length/2 == n*l) {
+						setEnabled();
+					}
 				}
 			}
 		});
 		
-		lblBi = new Label(parent, SWT.NONE);
-		lblBi.setBounds(10, 389, 70, 20);
-		lblBi.setText("Bi");
-		lblBi.setEnabled(false);
-		lblBi.setVisible(false);
+		txt_Verifkey.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				
+				// Changes Public Key if modified
+				
+				ctr++;
+				
+				if (ctr%2 != 0 && disable) {
+					setDisabled(txt_Verifkey);
+				} else {
+					publicKey = txt_Verifkey.getText();
+					txt_VerKeySize.setText(Integer.toString(files.Converter._stringToByte(publicKey).length/2) + "/" + (n*instance.getPublicKeyLength()) + " B");
+			
+					if (files.Converter._stringToByte(publicKey).length/2 == (n*instance.getPublicKeyLength())) {
+						setEnabled();
+					}
+				}
+			}
+		});
 		
-		txt_MessageSize = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
-		txt_MessageSize.setBounds(610, 159, 78, 26);
-		txt_MessageSize.setText(Integer.toString(files.Converter._stringToByte(message).length) + " Bytes");
+		txt_Sig.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				
+				// Changes signature if modified
+				
+				ctr++;
+				
+				if (ctr%2 != 0 && disable) {
+					setDisabled(txt_Sig);
+				} else {
+					signature = txt_Sig.getText();
+					txt_SignatureSize.setText(Integer.toString(files.Converter._stringToByte(signature).length/2) + "/" + (n*l) + " B");
+			
+					if (files.Converter._stringToByte(signature).length/2 == n*l) {
+						setEnabled();
+					}
+				}
+			}
+		});
 		
-		txt_SigKeySize = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
-		txt_SigKeySize.setBounds(238, 440, 108, 26);
-		txt_SigKeySize.setText(Integer.toString(files.Converter._stringToByte(privateKey).length/2) + "/" + (n*l) + "B");
+		txt_Hash.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				
+				// Changes Hash and Bitstring bi if modified
+				
+				ctr++;
+				
+				if (ctr%2 != 0 && disable) {
+					setDisabled(txt_Hash);
+				} else {
+					messageHash = txt_Hash.getText();
+					txt_HashSize.setText(Integer.toString(files.Converter._stringToByte(messageHash).length/2) + "/" + n + " B");
+
+					if (files.Converter._stringToByte(messageHash).length/2 == n) {
+						
+						instance.setMessage(files.Converter._hexStringToByte(messageHash));
+						b = files.Converter._byteToHex(instance.initB());
+						ctr = 1;
+						txt_Bi.setText(b);
+						setEnabled();
+					} 
+				}
+			}
+		});
 		
-		txt_VerKeySize = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
-		txt_VerKeySize.setBounds(580, 440, 108, 26);
-		txt_VerKeySize.setText(Integer.toString(files.Converter._stringToByte(publicKey).length/2) + "/" + (n*instance.getPublicKeyLength()) + "B");
+		txt_Bi.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				
+				// Changes Bitstring bi if modified
+				
+				ctr++;
+				
+				if (ctr%2 != 0 && disable) {
+					setDisabled(txt_Bi);
+				} else {
+					b = txt_Bi.getText();
+					instance.setBi(files.Converter._hexStringToByte(b));
+					txt_BSize.setText(Integer.toString(files.Converter._stringToByte(b).length/2) + "/" + l + " B");
+			
+					if (files.Converter._stringToByte(b).length/2 == l) {
+						setEnabled();
+					}
+				}
+			}
+		});
 		
-		txt_HashSize = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
-		txt_HashSize.setBounds(610, 159, 78, 26);
-		txt_HashSize.setText(Integer.toString(files.Converter._hexStringToByte(messageHash).length) + "/" + n + "B");
-		txt_HashSize.setEnabled(false);
-		txt_HashSize.setVisible(false);
 		
-		txt_SignatureSize = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
-		txt_SignatureSize.setBounds(472, 603, 108, 26);
-		txt_SignatureSize.setText(Integer.toString(files.Converter._stringToByte(signature).length/2) + "/" + (n*l) + "B");
-		
-		txt_BSize = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
-		txt_BSize.setBounds(610, 477, 78, 26);
-		txt_BSize.setText(Integer.toString(files.Converter._hexStringToByte(b).length) + "/" + l + "B");
-		txt_BSize.setEnabled(false);
-		txt_BSize.setVisible(false);
-		
-		init = true;
-		message = "standard message";
+		// Finisch Initialization
+		txtToEnableOrDisable = new Text[]{txt_message,txt_Sigkey,txt_Verifkey,txt_Hash,txt_Sig,txt_Bi,txt_winternitzP};
+		btnToEnableOrDisable = new Button[]{btnWots,btnWotsPlus,btn_Genkey,btn_VerifySig,btn_Sign,btnLoadMessageFrom};
 	}
 
 	/**
@@ -684,7 +743,10 @@ public class View extends ViewPart {
 		//viewer.getControl().setFocus();
 	}
 	
-	public void setOutputs() {
+	/**
+	 * Sets the Variables of the WOTS/WOTS+ instance to the one defined in this class
+	 */
+	private void setOutputs() {
 		
 		instance.setW(w);
 		instance.setPrivateKey(files.Converter._hexStringTo2dByte(privateKey, instance.getLength()));
@@ -694,7 +756,11 @@ public class View extends ViewPart {
 		instance.setBi(files.Converter._hexStringToByte(b));
 	}
 	
-	public void getOutputs() {
+	/**
+	 * Get the calculated Values from the WOTS/WOTS+ instance and set global variables of this class
+	 * Sets txt-fields to the values got from WOTS/WOTS+ instance
+	 */
+	private void getOutputs() {
 		this.privateKey = files.Converter._2dByteToHex(instance.getPrivateKey());
 		this.publicKey = files.Converter._2dByteToHex(instance.getPublicKey());
 		this.signature = files.Converter._byteToHex(instance.getSignature());
@@ -708,6 +774,38 @@ public class View extends ViewPart {
 		txt_Bi.setText(b);
 		txt_Sig.setText(signature);
 		txt_Hash.setText(messageHash);
+	}
+	
+	/**
+	 * Method that disables all txt-fields and buttons that can be activated/edited except for the @param exception
+	 */
+	private void setDisabled(Text exception) {
+		
+		// Disables all Buttons and editable text-fields except for the given exception
+		for (int i = 0; i < txtToEnableOrDisable.length; i++) {
+			if (!txtToEnableOrDisable[i].equals(exception)) {
+				txtToEnableOrDisable[i].setEnabled(false);
+			}
+		}
+		for (int i = 0; i < btnToEnableOrDisable.length; i++) {
+			btnToEnableOrDisable[i].setEnabled(false);
+		}	
+	}
+	
+	/** 
+	 * Enables all Buttons and txt-fields that can be activated/edited
+	 */
+	private void setEnabled() {
+		
+		// Enables all Buttons and editable text-fields
+		for (int i = 0; i < txtToEnableOrDisable.length; i++) {
+			txtToEnableOrDisable[i].setEnabled(true);
+		}
+		for (int i = 0; i < btnToEnableOrDisable.length; i++) {
+			btnToEnableOrDisable[i].setEnabled(true);
+		}
+		
+		ctr = 0;
 	}
 }
 
