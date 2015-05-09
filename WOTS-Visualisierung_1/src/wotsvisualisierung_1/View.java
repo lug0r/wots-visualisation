@@ -2,17 +2,17 @@ package wotsvisualisierung_1;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.SecureRandom;
-
 import javax.swing.JFileChooser;
-
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
@@ -29,33 +29,57 @@ public class View extends ViewPart {
 		setPartName("WOTS-Visualisierung");
 	}
 	public static final String ID = "asdf.view";
+	
+	
 	public Text txt_message;
-	private Text txt_winternitzP;
+	private Text txt_MessageSize;
+	
 	private Text txt_Sigkey;
+	private Text txt_SigKeySize;
+	
 	private Text txt_Verifkey;
+	private Text txt_VerKeySize;
+	
+	private Text txt_Hash;
+	private Text txt_HashSize;
+	
 	private Text txt_Sig;
+	private Text txt_SignatureSize;
+	
+	private Text txt_Bi;
+	private Text txt_BSize;
+	
+	private Text txt_winternitzP;
+	
 	private Text txt_true_false;
-	private Label img_right;
+	
 	private Button btnWots;
 	private Button btnWotsPlus;
-	private Text txt_Output;
-	private Text txt_Hash;
-	private Text txt_Bi;
-	private boolean details = false;
+	
 	private Label lblMessageHash;
 	private Label lblBi;
+	private Label lblSignature;
 	
-	private wots.WinternitzOTS instance = new wots.WinternitzOTS(4);
+	private Button btn_Genkey;
+	private Button btn_VerifySig;
+	private Button btn_Sign;
+	
+	private Label img_right;
+	private Text txt_Output;
+	
+	// Parameter for WOTS/WOTS+
+	private wots.OTS instance = new wots.WinternitzOTS(4);
 	private String privateKey = "";
 	private String publicKey = "";
 	private String signature = "";
 	private int w = 4;
-	private int n;
-	private int l;
-	private String message = "standard message";
+	private int n = instance.getN();
+	private int l = instance.getL();
+	private String message = "";
 	private String messageHash = files.Converter._byteToHex(instance.hashMessage(message));
 	private String b = files.Converter._byteToHex(instance.initB());
-	
+	private boolean details = false;
+	private boolean init = false;
 	
 	/**
 	 * @wbp.nonvisual location=214,209
@@ -108,7 +132,7 @@ public class View extends ViewPart {
 		parent.setToolTipText("");
 		parent.setLayout(null);
 		
-		Button btn_Genkey = new Button(parent, SWT.NONE);
+		btn_Genkey = new Button(parent, SWT.NONE);
 		btn_Genkey.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -140,11 +164,11 @@ public class View extends ViewPart {
 			}
 		});
 
-		btn_Genkey.setBounds(10, 615, 116, 25);
+		btn_Genkey.setBounds(10, 674, 116, 25);
 		btn_Genkey.setText("Generate keys");
 		
-		Button btnNewButton_1 = new Button(parent, SWT.NONE);
-		btnNewButton_1.addSelectionListener(new SelectionAdapter() {
+		btn_Sign = new Button(parent, SWT.NONE);
+		btn_Sign.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
@@ -173,10 +197,10 @@ public class View extends ViewPart {
 				getOutputs();
 			}
 		});
-		btnNewButton_1.setText("Generate signature");
-		btnNewButton_1.setBounds(132, 615, 146, 25);
+		btn_Sign.setText("Generate signature");
+		btn_Sign.setBounds(132, 674, 146, 25);
 		
-		Button btn_VerifySig = new Button(parent, SWT.NONE);
+		btn_VerifySig = new Button(parent, SWT.NONE);
 		btn_VerifySig.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -209,7 +233,7 @@ public class View extends ViewPart {
 				}
 			}
 		});
-		btn_VerifySig.setBounds(284, 615, 122, 25);
+		btn_VerifySig.setBounds(284, 674, 122, 25);
 		btn_VerifySig.setText("Verify signature");
 		
 		Label lblWotsVisualization = new Label(parent, SWT.NONE);
@@ -222,6 +246,22 @@ public class View extends ViewPart {
 		
 		txt_message = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
 		txt_message.setBounds(9, 58, 679, 96);
+		txt_message.addModifyListener(new ModifyListener() {
+			
+			@Override
+			public void modifyText(ModifyEvent e) {
+				
+				message = txt_message.getText();
+				messageHash = files.Converter._byteToHex(instance.hashMessage(message));
+				b = files.Converter._byteToHex(instance.initB());
+				
+				if (init) {
+					txt_Hash.setText(messageHash);
+					txt_Bi.setText(b);
+					txt_MessageSize.setText(Integer.toString(files.Converter._stringToByte(message).length) + " Bytes");
+				}
+			}
+		});
 		
 		Button btnLoadMessageFrom = new Button(parent, SWT.NONE);
 		btnLoadMessageFrom.addSelectionListener(new SelectionAdapter() {
@@ -256,6 +296,15 @@ public class View extends ViewPart {
 		txt_winternitzP = new Text(parent, SWT.BORDER);
 		txt_winternitzP.setText("4");
 		txt_winternitzP.setBounds(156, 197, 31, 21);
+		txt_winternitzP.addModifyListener(new ModifyListener() {
+			
+			@Override
+			public void modifyText(ModifyEvent e) {
+				
+				w = Integer.parseInt(txt_winternitzP.getText());
+				instance.setW(w);
+			}
+		});
 		
 		Label lblHashFunction = new Label(parent, SWT.NONE);
 		lblHashFunction.setBounds(10, 224, 96, 25);
@@ -276,21 +325,87 @@ public class View extends ViewPart {
 		txt_Sigkey = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
 		txt_Sigkey.setText("");
 		txt_Sigkey.setBounds(10, 283, 336, 151);
+		txt_Sigkey.addModifyListener(new ModifyListener() {
+			
+			@Override
+			public void modifyText(ModifyEvent e) {
+				
+				privateKey = txt_Sigkey.getText();
+				txt_SigKeySize.setText(Integer.toString(files.Converter._stringToByte(privateKey).length/2) + "/" + (n*l) + "B");
+			
+				if (files.Converter._stringToByte(privateKey).length/2 != n*l) {
+					btn_Genkey.setEnabled(false);
+					btn_Sign.setEnabled(false);
+					btn_VerifySig.setEnabled(false);
+				} else {
+					btn_Genkey.setEnabled(true);
+					btn_Sign.setEnabled(true);
+					btn_VerifySig.setEnabled(true);
+				}
+			}
+		});
 		
 		txt_Verifkey = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
 		txt_Verifkey.setBounds(352, 283, 336, 151);
+		txt_Verifkey.addModifyListener(new ModifyListener() {
+			
+			@Override
+			public void modifyText(ModifyEvent e) {
+				
+				publicKey = txt_Verifkey.getText();
+				txt_VerKeySize.setText(Integer.toString(files.Converter._stringToByte(publicKey).length/2) + "/" + (n*instance.getPublicKeyLength()) + "B");
+			
+				if (files.Converter._stringToByte(publicKey).length/2 != (n*instance.getPublicKeyLength())) {
+					btn_Genkey.setEnabled(false);
+					btn_Sign.setEnabled(false);
+					btn_VerifySig.setEnabled(false);
+				} else {
+					btn_Genkey.setEnabled(true);
+					btn_Sign.setEnabled(true);
+					btn_VerifySig.setEnabled(true);
+				}
+			}
+		});
 		
-		Label lblSignature = new Label(parent, SWT.NONE);
-		lblSignature.setBounds(10, 477, 75, 21);
+		lblSignature = new Label(parent, SWT.NONE);
+		lblSignature.setBounds(10, 463, 75, 21);
 		lblSignature.setText("Signature");
 		
 		txt_Sig = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
-		txt_Sig.setBounds(10, 498, 570, 107);
+		txt_Sig.setBounds(10, 490, 570, 107);
+		txt_Sig.addModifyListener(new ModifyListener() {
+			
+			@Override
+			public void modifyText(ModifyEvent e) {
+				
+				signature = txt_Sig.getText();
+				txt_SignatureSize.setText(Integer.toString(files.Converter._stringToByte(signature).length/2) + "/" + (n*l) + "B");
+			
+				if (files.Converter._stringToByte(signature).length/2 != n*l) {
+					btn_Genkey.setEnabled(false);
+					btn_Sign.setEnabled(false);
+					btn_VerifySig.setEnabled(false);
+				} else {
+					btn_Genkey.setEnabled(true);
+					btn_Sign.setEnabled(true);
+					btn_VerifySig.setEnabled(true);
+				}
+			}
+		});
 		
 		Button btn_reset = new Button(parent, SWT.NONE);
 		btn_reset.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				
+				instance = new wots.WinternitzOTS(4);
+				privateKey = "";
+				publicKey = "";
+				signature = "";
+				w = 4;
+				message = "standard message";
+				messageHash = files.Converter._byteToHex(instance.hashMessage(message));
+				b = files.Converter._byteToHex(instance.initB());
 				
 				txt_message.setText("standard message");
 				txt_Sigkey.setText("");
@@ -300,38 +415,72 @@ public class View extends ViewPart {
 				txt_true_false.setText("");
 				txt_Output.setText("This is the welcome message of our plugin, please insert something which makes more sense!");
 				img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/Overview2.PNG"));
-//				Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Overview2.PNG");
-//				img_right.setImage(img);
-				txt_Hash.setText("");
-				txt_Bi.setText("");
+				txt_Hash.setText(messageHash);
+				txt_Bi.setText(b);
+				
+				btnWots.setSelection(true);
+				btnWotsPlus.setSelection(false);
 			}
 		});
-		btn_reset.setBounds(520, 615, 75, 25);
+		btn_reset.setBounds(520, 674, 75, 25);
 		btn_reset.setText("Reset");
 		
 		txt_true_false = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.CENTER);
 		txt_true_false.setEditable(false);
-		txt_true_false.setBounds(586, 498, 102, 107);
+		txt_true_false.setBounds(586, 490, 102, 107);
 		txt_message.setText("standard message");
 		img_right = new Label(parent, 0);
-		img_right.setBounds(723, 283, 483, 322);
+		img_right.setBounds(723, 346, 483, 322);
 		img_right.setImage(ResourceManager.getPluginImage("WOTS-Visualisierung_1", "images/Overview2.PNG"));
-
-//		Image img = new Image(org.eclipse.swt.widgets.Display.getCurrent(), "C:/Users/Hannes/Desktop/Studium/4.Semester/Projekt/Images/Konzept/Overview2.PNG");
-//		img_right.setImage(img);
 		
 		btnWots = new Button(parent, SWT.RADIO);
 		btnWots.setBounds(352, 186, 111, 20);
 		btnWots.setText("WOTS");
 		btnWots.setSelection(true);
+		btnWots.addSelectionListener( new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				instance = new wots.WinternitzOTS(w);
+				privateKey = "";
+				publicKey = "";
+				signature = "";
+				txt_Sigkey.setText("");
+				txt_Verifkey.setText("");
+				txt_Sig.setText("");
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {	
+			}
+		});
 		
 		btnWotsPlus = new Button(parent, SWT.RADIO);
 		btnWotsPlus.setBounds(352, 217, 111, 20);
 		btnWotsPlus.setText("WOTS+");
+		btnWotsPlus.addSelectionListener( new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				instance = new wots.WOTSPlus(w);
+				privateKey = "";
+				publicKey = "";
+				signature = "";
+				txt_Sigkey.setText("");
+				txt_Verifkey.setText("");
+				txt_Sig.setText("");
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {	
+			}
+		});
 		
 		txt_Output = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.MULTI);
 		txt_Output.setEditable(false);
-		txt_Output.setBounds(723, 58, 483, 191);
+		txt_Output.setBounds(723, 58, 483, 282);
 		txt_Output.setText("This is the welcome message of our plugin, please insert something which makes more sense!");
 		
 		Button btn_Details = new Button(parent, SWT.NONE);
@@ -340,10 +489,6 @@ public class View extends ViewPart {
 			public void widgetSelected(SelectionEvent e) {
 				
 				if (!details) {
-					
-					// Explains what is different to normal Version
-					
-					txt_Output.setText("This is a more detailed view of the WOTS/WOTS+ algorithm. In this view you are able to take a look and edit the hash of the message and the calculated Bitstring Bi.\nTo use the detailed version properly, you have to generate the Hash and the Bitstring Bi manually by clicking on the Buttons \"Hash Message\" and \"Calculate Bi\".");
 					
 					// Sets the View to a more detailed Version
 					
@@ -361,17 +506,29 @@ public class View extends ViewPart {
 					lblBi.setEnabled(true);
 					lblBi.setVisible(true);
 					
+					txt_HashSize.setEnabled(true);
+					txt_HashSize.setVisible(true);
+					
+					txt_BSize.setEnabled(true);
+					txt_BSize.setVisible(true);
+					
 					// Compress txt_fields to fit detailed view
 					
 					txt_message.setBounds(9, 58, 337, 96);
+					txt_MessageSize.setBounds(268, 159, 78, 26);
+					
 					txt_Sigkey.setBounds(10, 283, 336, 75);
+					txt_SigKeySize.setBounds(238, 363, 108, 26);
+					
 					txt_Verifkey.setBounds(352, 283, 336, 75);
+					txt_VerKeySize.setBounds(580, 363, 108, 26);
+					
+					txt_Sig.setBounds(10, 531, 570, 107);
+					txt_SignatureSize.setBounds(472, 642, 108, 26);
+					txt_true_false.setBounds(586, 531, 102, 107);
+					lblSignature.setBounds(10, 500, 75, 21);
 					
 				} else if (details) {
-					
-					// States that now the normal view is showed
-					
-					txt_Output.setText("You switched back to the normal view of the WOTS/WOTS+ algorithm.");
 					
 					// Hides the details shown before
 					
@@ -389,25 +546,66 @@ public class View extends ViewPart {
 					lblBi.setEnabled(false);
 					lblBi.setVisible(false);
 					
+					txt_HashSize.setEnabled(false);
+					txt_HashSize.setVisible(false);
+					
+					txt_BSize.setEnabled(false);
+					txt_BSize.setVisible(false);
+					
 					// Set sizes back to original
 					
 					txt_message.setBounds(9, 58, 679, 96);
+					txt_MessageSize.setBounds(610, 159, 78, 26);
+			
 					txt_Sigkey.setBounds(10, 283, 336, 151);
-					txt_Verifkey.setBounds(352, 283, 336, 151);
+					txt_SigKeySize.setBounds(238, 440, 108, 26);
 					
+					txt_Verifkey.setBounds(352, 283, 336, 151);
+					txt_VerKeySize.setBounds(580, 440, 108, 26);
+					
+					txt_Sig.setBounds(10, 490, 570, 107);
+					txt_SignatureSize.setBounds(472, 603, 108, 26);
+					txt_true_false.setBounds(586, 490, 102, 107);
+					lblSignature.setBounds(10, 463, 75, 21);
 				
 				} else {
 					// TODO error message
 				}		
 			}
 		});
-		btn_Details.setBounds(412, 615, 102, 25);
+		btn_Details.setBounds(412, 674, 102, 25);
 		btn_Details.setText("Toggle Details");
 		
 		txt_Hash = new Text(parent, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
 		txt_Hash.setBounds(352, 58, 336, 96);
 		txt_Hash.setEnabled(false);
 		txt_Hash.setVisible(false);
+		txt_Hash.setText(messageHash);
+		txt_Hash.addModifyListener(new ModifyListener() {
+			
+			@Override
+			public void modifyText(ModifyEvent e) {
+				
+				messageHash = txt_Hash.getText();
+				instance.setMessage(files.Converter._hexStringToByte(messageHash));
+				b = files.Converter._byteToHex(instance.initB());
+				
+				if (init) {
+					txt_Bi.setText(b);
+					txt_HashSize.setText(Integer.toString(files.Converter._stringToByte(messageHash).length/2) + "/" + n + "B");
+				}
+				
+				if (files.Converter._stringToByte(messageHash).length/2 != n) {
+					btn_Genkey.setEnabled(false);
+					btn_Sign.setEnabled(false);
+					btn_VerifySig.setEnabled(false);
+				} else {
+					btn_Genkey.setEnabled(true);
+					btn_Sign.setEnabled(true);
+					btn_VerifySig.setEnabled(true);
+				}
+			}
+		});
 		
 		lblMessageHash = new Label(parent, SWT.NONE);
 		lblMessageHash.setBounds(354, 37, 109, 20);
@@ -419,6 +617,27 @@ public class View extends ViewPart {
 		txt_Bi.setBounds(10, 415, 678, 56);
 		txt_Bi.setEnabled(false);
 		txt_Bi.setVisible(false);
+		txt_Bi.setText(b);
+		txt_Bi.addModifyListener(new ModifyListener() {
+			
+			@Override
+			public void modifyText(ModifyEvent e) {
+				
+				b = txt_Bi.getText();
+				instance.setBi(files.Converter._hexStringToByte(b));
+				txt_BSize.setText(Integer.toString(files.Converter._stringToByte(b).length/2) + "/" + l + "B");
+			
+				if (files.Converter._stringToByte(b).length/2 != l) {
+					btn_Genkey.setEnabled(false);
+					btn_Sign.setEnabled(false);
+					btn_VerifySig.setEnabled(false);
+				} else {
+					btn_Genkey.setEnabled(true);
+					btn_Sign.setEnabled(true);
+					btn_VerifySig.setEnabled(true);
+				}
+			}
+		});
 		
 		lblBi = new Label(parent, SWT.NONE);
 		lblBi.setBounds(10, 389, 70, 20);
@@ -426,8 +645,36 @@ public class View extends ViewPart {
 		lblBi.setEnabled(false);
 		lblBi.setVisible(false);
 		
-
+		txt_MessageSize = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
+		txt_MessageSize.setBounds(610, 159, 78, 26);
+		txt_MessageSize.setText(Integer.toString(files.Converter._stringToByte(message).length) + " Bytes");
 		
+		txt_SigKeySize = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
+		txt_SigKeySize.setBounds(238, 440, 108, 26);
+		txt_SigKeySize.setText(Integer.toString(files.Converter._stringToByte(privateKey).length/2) + "/" + (n*l) + "B");
+		
+		txt_VerKeySize = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
+		txt_VerKeySize.setBounds(580, 440, 108, 26);
+		txt_VerKeySize.setText(Integer.toString(files.Converter._stringToByte(publicKey).length/2) + "/" + (n*instance.getPublicKeyLength()) + "B");
+		
+		txt_HashSize = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
+		txt_HashSize.setBounds(610, 159, 78, 26);
+		txt_HashSize.setText(Integer.toString(files.Converter._hexStringToByte(messageHash).length) + "/" + n + "B");
+		txt_HashSize.setEnabled(false);
+		txt_HashSize.setVisible(false);
+		
+		txt_SignatureSize = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
+		txt_SignatureSize.setBounds(472, 603, 108, 26);
+		txt_SignatureSize.setText(Integer.toString(files.Converter._stringToByte(signature).length/2) + "/" + (n*l) + "B");
+		
+		txt_BSize = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
+		txt_BSize.setBounds(610, 477, 78, 26);
+		txt_BSize.setText(Integer.toString(files.Converter._hexStringToByte(b).length) + "/" + l + "B");
+		txt_BSize.setEnabled(false);
+		txt_BSize.setVisible(false);
+		
+		init = true;
+		message = "standard message";
 	}
 
 	/**
@@ -441,7 +688,7 @@ public class View extends ViewPart {
 		
 		instance.setW(w);
 		instance.setPrivateKey(files.Converter._hexStringTo2dByte(privateKey, instance.getLength()));
-		instance.setPublicKey(files.Converter._hexStringTo2dByte(publicKey, instance.getLength()));
+		instance.setPublicKey(files.Converter._hexStringTo2dByte(publicKey, instance.getPublicKeyLength()));
 		instance.setSignature(files.Converter._hexStringToByte(signature));
 		instance.setMessage(files.Converter._hexStringToByte(messageHash));
 		instance.setBi(files.Converter._hexStringToByte(b));
@@ -453,6 +700,8 @@ public class View extends ViewPart {
 		this.signature = files.Converter._byteToHex(instance.getSignature());
 		this.messageHash = files.Converter._byteToHex(instance.getMessageHash());
 		this.b = files.Converter._byteToHex(instance.getBi());
+		this.n = instance.getN();
+		this.l = instance.getL();
 		
 		txt_Sigkey.setText(privateKey);
 		txt_Verifkey.setText(publicKey);
